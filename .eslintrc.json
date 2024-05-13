@@ -1,0 +1,17 @@
+{
+	"extends": "next/core-web-vitals",
+	"overrides": [],
+	"rules": {
+		"indent": [
+			"off",
+			2
+		],
+		"no-unused-vars": "warn",
+		"quotes": [
+			"warn",
+			"double"
+		],
+		"semi": ["warn", "always", {"omitLastInOneLineBlock": true}]
+	},
+	"globals": {}
+}
