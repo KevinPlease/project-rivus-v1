@@ -34,7 +34,7 @@ export const AccountButton = () => {
             height: 32,
             width: 32
           }}
-          src={user?.data.details.image?.url}
+          src={user?.data.image?.url}
         >
           {/* <SvgIcon>
             <User01Icon />

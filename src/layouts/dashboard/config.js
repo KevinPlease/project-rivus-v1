@@ -100,25 +100,6 @@ export const useSections = () =>
         // subheader: t(tokens.nav.concepts),
         items: [
           {
-            title: t(tokens.nav.leads),
-            path: paths.dashboard.leads.index,
-            icon: (
-                <SvgIcon fontSize="small">
-                  <ContactPageOutlinedIcon  />
-                </SvgIcon>
-            ),
-            // items: [
-            //   {
-            //     title: t(tokens.nav.list),
-            //     path: paths.dashboard.leads.index
-            //   },
-            //   {
-            //     title: t(tokens.nav.create),
-            //     path: paths.dashboard.leads.create
-            //   }
-            // ]
-          },
-          {
             title: t(tokens.nav.customers),
             path: paths.dashboard.customers.index,
             icon: (
@@ -134,25 +115,6 @@ export const useSections = () =>
             //   {
             //     title: t(tokens.nav.create),
             //     path: paths.dashboard.customers.create
-            //   }
-            // ]
-          },
-          {
-            title: t(tokens.nav.opportunity),
-            path: paths.dashboard.opportunity.index,
-            icon: (
-                <SvgIcon fontSize="small">
-                  <EmojiObjectsOutlinedIcon />
-                </SvgIcon>
-            ),
-            // items: [
-            //   {
-            //     title: t(tokens.nav.list),
-            //     path: paths.dashboard.opportunity.index
-            //   },
-            //   {
-            //     title: t(tokens.nav.create),
-            //     path: paths.dashboard.opportunity.create
             //   }
             // ]
           },
@@ -176,25 +138,25 @@ export const useSections = () =>
             //   }
             // ]
           },
-          // {
-          //   title: t(tokens.nav.orderList),
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <ShoppingCart01Icon />
-          //     </SvgIcon>
-          //   ),
-          //   path: paths.dashboard.orders.index,
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.list),
-          //       path: paths.dashboard.orders.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.details),
-          //       path: paths.dashboard.orders.details
-          //     }
-          //   ]
-          // },
+          {
+            title: t(tokens.nav.orderList),
+            icon: (
+              <SvgIcon fontSize="small">
+                <ShoppingCart01Icon />
+              </SvgIcon>
+            ),
+            path: paths.dashboard.orders.index,
+            items: [
+              {
+                title: t(tokens.nav.list),
+                path: paths.dashboard.orders.index
+              },
+              {
+                title: t(tokens.nav.details),
+                path: paths.dashboard.orders.details
+              }
+            ]
+          },
           // {
           //   title: t(tokens.nav.invoiceList),
           //   path: paths.dashboard.invoices.index,

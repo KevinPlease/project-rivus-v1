@@ -58,9 +58,9 @@ export const AccountGeneralSettings = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    if (!user?.data.details.image) return;
+    if (!user?.data.image) return;
 
-    setImage(user.data.details.image);
+    setImage(user.data.image);
   }, [user]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleImageDrop });

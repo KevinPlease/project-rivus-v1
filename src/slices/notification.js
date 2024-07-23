@@ -1,8 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import SMatchFinder from "../work/SMatchFinder";
 
 const initialState = {
-    matchTimer: SMatchFinder.ASK_INTERVAL,
     notifications: []
 };
 
@@ -26,10 +24,8 @@ const reducers = {
         reducers.resetNotifications(state);
     },
     askQuickNotifications(state, action) {
-        if (state.matchTimer > 3000) state.matchTimer = 3000;
     },
     resetNotifications(state, action) {
-        state.matchTimer = SMatchFinder.ASK_INTERVAL;
     },
     deleteAllNotifications(state, action) {
         state.notifications = [];

@@ -67,7 +67,7 @@ const Page = () => {
           >
             <Button
               component={RouterLink}
-              href={paths.dashboard.leads.index}
+              href={paths.dashboard.customers}
             >
               Back to Home
             </Button>

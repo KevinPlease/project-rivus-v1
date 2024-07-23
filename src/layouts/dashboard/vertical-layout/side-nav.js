@@ -194,7 +194,7 @@ export const SideNav = (props) => {
           >
             <Box
               component={RouterLink}
-              href={paths.dashboard.leads.index}
+              href={paths.dashboard.customers}
               sx={{
                 borderColor: 'var(--nav-logo-border)',
                 borderRadius: 1,

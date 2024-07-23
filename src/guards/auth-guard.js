@@ -7,10 +7,6 @@ import { paths } from 'src/paths';
 import { Issuer } from 'src/utils/auth';
 
 const loginPaths = {
-  [Issuer.Amplify]: paths.auth.amplify.login,
-  [Issuer.Auth0]: paths.auth.auth0.login,
-  [Issuer.Firebase]: paths.auth.firebase.login,
-  [Issuer.JWT]: paths.auth.jwt.login,
   [Issuer.USER]: paths.auth.user.login
 };
 

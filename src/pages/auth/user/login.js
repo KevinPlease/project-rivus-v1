@@ -52,7 +52,7 @@ const Page = () => {
         await signIn(values.username, values.password);
 
         if (isMounted()) {
-          const pathToReturnTo = returnTo !== "/" ? returnTo : paths.dashboard.leads.index;
+          const pathToReturnTo = returnTo !== "/" ? returnTo : paths.dashboard.customers;
           router.push(pathToReturnTo);
         }
       } catch (err) {

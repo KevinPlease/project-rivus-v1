@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material/styles';
 import Image from "next/image";
-import logo_secondary from "src/icons/Tokton_Primary_03.png";
+import logo_secondary from "src/icons/Logo_01.png";
 
 export const Logo = () => {
   const theme = useTheme();

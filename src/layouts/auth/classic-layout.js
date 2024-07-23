@@ -47,7 +47,7 @@ export const Layout = (props) => {
               component={RouterLink}
               direction="row"
               display="inline-flex"
-              href={paths.dashboard.leads.index}
+              href={paths.dashboard.customers}
               spacing={1}
               sx={{ textDecoration: 'none' }}
             >

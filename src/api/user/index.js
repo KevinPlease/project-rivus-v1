@@ -11,7 +11,8 @@ class UserAPI extends BaseAPI {
   constructor() {
     super(UserAPI.MODEL_NAME, UserAPI.MODEL_NAME_PLURAL);
 
-    this.api[UserAPI.AUTH] = UserAPI.AUTH + "/" + UserAPI.MODEL_NAME;
+    this.api[UserAPI.AUTH] = UserAPI.AUTH;
+    this.api.authUser = UserAPI.AUTH + "/" + UserAPI.MODEL_NAME;
   }
 
   async signIn(username, password) {
@@ -36,7 +37,7 @@ class UserAPI extends BaseAPI {
   
   async getUser(token) {
     const tokenQuery = { token };
-    const response = await this.network.callGetAPI({}, this.api.auth, tokenQuery);
+    const response = await this.network.callGetAPI({}, this.api.authUser, tokenQuery);
     if (response.status === "failure") return;
 
     const user = response.data[this.api.single].model;
