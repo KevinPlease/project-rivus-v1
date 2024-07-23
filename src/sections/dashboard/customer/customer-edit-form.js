@@ -1,244 +1,344 @@
-import PropTypes from "prop-types";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
-import Divider from "@mui/material/Divider";
+import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Unstable_Grid2";
 import Stack from "@mui/material/Stack";
-import Switch from "@mui/material/Switch";
-import TextField from "@mui/material/TextField";
+import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import { useMounted } from "src/hooks/use-mounted";
-import { RouterLink } from "src/components/router-link";
-import { paths } from "src/paths";
-import { wait } from "src/utils/wait";
-import { TextareaAutosize } from "@mui/material";
+import Divider from "@mui/material/Divider";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import { useRouter } from "next/router";
-import { useEffect, useState, useCallback } from "react";
 
+import { paths } from "src/paths";
+import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
+import { CustomerBasicDetails } from "src/sections/dashboard/customer/customer-basic-details";
+import { CustomerPersonalDetails } from "src/sections/dashboard/customer/customer-personal-details";
+import { CustomerDataManagement } from "src/sections/dashboard/customer/customer-data-management";
+import { CustomerDocuments } from "src/sections/dashboard/customer/customer-documents";
+import { CustomerProperties } from "src/sections/dashboard/customer/customer-properties";
+import { CustomerAgentDetails } from "src/sections/dashboard/customer/customer-agent-details";
+import { ConfirmationDialog } from "src/sections/confirmation-dialog";
+import { FormButtons } from "src/sections/form-buttons";
 
+import { base64ToFile } from "src/utils/file-to-base64";
+import { toDocDetails } from "src/utils/files-to-docdetails";
+import customerApi from "src/api/customer";
+import { useAuth } from "src/hooks/use-auth";
+import BaseAPI from "src/api/BaseAPI";
 
-export const CustomerEditForm = ({current,leadsData}) => {
+import ENV from "../../../../env";
+const LIMITED_ROLES = ENV.LIMITED_ROLES;
+
+const REQUIRED = "Field is required!";
+
+export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [currentTab, setCurrentTab] = useState("details");
+  const [unlockedEdit, setUnlockedEdit] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [files, setFiles] = useState([]);
+
+  const tabs = useMemo(() => [
+    { label: !unlockedEdit ? "Details" : "Edit Details", value: "details" },
+    { label: "Listings", value: "listings" },
+    { label: "Matches", value: "matches" },
+    // { label: "Comments", value: "comments" },
+  ], [unlockedEdit]);
+
+  const isLimitedUser = useMemo(() => {
+    return LIMITED_ROLES.includes(user?.data.role._id) && data?.assignee !== user?._id;
+  }, [data, user]);
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      title: leadsData.title || "",
-      phone: leadsData.phone || "",
-      address: leadsData.address || "",
-      source: leadsData.source || "",
-      role: leadsData.role || "",
-      name: leadsData.fullName || "",
-      assignee: leadsData.assignee || "",
-      description: leadsData.description || "",
+      name: data.name || "",
+      title: data.title || "",
+      mobile: data.mobile || "",
+      email: data.email || "",
+      birthdate: data.birthdate ? new Date(data.birthdate) : null,
+      address: data.address || "",
+      personalId: data.personalId || "",
+      assignee: data.assignee || "",
+      description: data.description || "",
+      documents: data.documents || [],
       submit: null
     },
     validationSchema: Yup.object({
-      title: Yup.string().max(255),
-      address: Yup.string().max(255),
-      source: Yup.string().max(255),
-      assignee: Yup.string().max(255),
+      title: Yup.string().max(255).required(REQUIRED),
+      name: Yup.string().max(255).required(REQUIRED),
+      mobile: Yup.string().max(20).required(REQUIRED),
+      personalId: Yup.string().max(255),
+      email: Yup.string().max(255),
+      birthdate: Yup.date(),
+      source: Yup.string().max(24),
       role: Yup.string().max(255),
-      description: Yup.string().max(500),
-      name: Yup.string().max(255).required("Full Name is required"),
-      phone: Yup.string().max(15),
+      assignee: Yup.string().max(24).required(REQUIRED),
+      description: Yup.string().max(500)
     }),
 
     onSubmit: async (values, helpers) => {
-      try {
-        // NOTE: Make API request
-        await wait(500);
-        helpers.setStatus({ success: true });
-        helpers.setSubmitting(false);
-        toast.success("Lead updated");
-      } catch (err) {
-        console.error(err);
+      values.isDraft = false;
+      await handleDocumentsUpload(files);
+      const authInfo = BaseAPI.authForInfo(user);
+      const response = await customerApi.update(authInfo, id, values);
+
+      if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);
+        return;
       }
+
+      helpers.setStatus({ success: true });
+      helpers.setSubmitting(false);
+      toast.success("Customer updated!");
+      router.push(paths.dashboard.customers.index);
     },
   });
 
+  const changeMode = () => {
+    setUnlockedEdit(prevState => (!prevState));
+  };
+
+  const handleTabsChange = useCallback((event, value) => {
+    setCurrentTab(value);
+  }, []);
+
+  const transformData = useCallback((data, type) => {
+    if (!data) return [];
+
+    return data.map(item => {
+      const file = base64ToFile(item.src, item.id);
+      return { ...item, file };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!data) return formik.setSubmitting(true);
+
+    setFiles(prevFiles => [...prevFiles, ...transformData(data.documents, "file")]);
+    formik.setSubmitting(false);
+  }, [data]);
+
+  const handleFilesDrop = useCallback((newFiles) => {
+    setFiles((prevFiles) => {
+      const documents = toDocDetails(newFiles);
+      return [...prevFiles, ...documents];
+    });
+  }, []);
+
+  const handleFileRemove = useCallback((index) => {
+    setFiles((prevFiles) => {
+      const newFiles = [...prevFiles]; // Create a copy of the array
+      newFiles.splice(index, 1); // Remove the element at the specified index
+      return newFiles;
+    });
+  }, []);
+
+  const handleDocumentsUpload = useCallback(async (allDocuments) => {
+    try {
+      formik.setSubmitting(true);
+      const docFiles = allDocuments.map(docDetail => docDetail.file).filter(docFile => docFile !== undefined);
+      const authInfo = BaseAPI.authForInfo(user);
+      const response = await customerApi.uploadDocuments(authInfo, id, docFiles);
+      if (response.status === "success") {
+        formik.setErrors(null);
+        formik.setSubmitting(false);
+        return
+      }
+
+      const errMsg = "There was a problem uploading documents!";
+      formik.setErrors({ documents: errMsg });
+      formik.setSubmitting(false);
+      toast(errMsg);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [id]);
+
+  const handleDelete = useCallback(async (event) => {
+    const authInfo = BaseAPI.authForInfo(user);
+    const response = await customerApi.delete(authInfo, id);
+
+    let status = "success";
+    let message = "Customer Deleted!";
+    if (response.status === "failure") {
+      status = "error";
+      message = "Something went wrong!";
+    }
+
+    formik.setSubmitting(false);
+    toast[status](message);
+    router.replace(paths.dashboard.customers.index);
+  }, [id, router]);
+
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Card>
-        <CardHeader title={`${current} Lead`} />
-        <CardContent sx={{ pt: 0 }}>
-          <Grid container spacing={3}>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.title && formik.errors?.title)}
-                fullWidth
-                helperText={formik.touched.title && formik.errors?.title}
-                label="Title"
-                name="name"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                required
-                value={formik.values.title}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.name && formik.errors?.name)}
-                fullWidth
-                helperText={formik.touched.name && formik.errors?.name}
-                label="Full name"
-                name="name"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                required
-                value={formik.values.name}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.phone && formik.errors?.phone)}
-                fullWidth
-                helperText={formik.touched.phone && formik.errors?.phone}
-                label="Phone"
-                name="country"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.phone}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.address && formik.errors?.address)}
-                fullWidth
-                helperText={formik.touched.address && formik.errors?.address}
-                label="Address"
-                name="state"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.state}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.role && formik.errors?.role)}
-                fullWidth
-                helperText={formik.touched.role && formik.errors?.role}
-                label="Role"
-                name="role"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.role}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={!!(formik.touched.assignee && formik.errors?.assignee)}
-                fullWidth
-                helperText={formik.touched.assignee && formik.errors?.assignee}
-                label="Assignee"
-                name="assignee"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.assignee}
-              />
-            </Grid>
-            <Grid xs={12} md={6}>
-              <TextField
-                error={
-                  !!(formik.touched.description && formik.errors?.description)
-                }
-                fullWidth
-                helperText={
-                  formik.touched.description && formik.errors?.description
-                }
-                label="Description"
-                name="description"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.description}
-                multiline
-              />
-            </Grid>
-          </Grid>
-          {/* <Stack divider={<Divider />} spacing={3} sx={{ mt: 3 }}>
+    <>
+      <form onSubmit={formik.handleSubmit}>
+        <Stack spacing={4}>
+          <Stack
+            alignItems="flex-start"
+            direction={{
+              xs: "column",
+              md: "row"
+            }}
+            justifyContent="space-between"
+            spacing={4}
+          >
             <Stack
               alignItems="center"
               direction="row"
-              justifyContent="space-between"
-              spacing={3}
+              spacing={2}
             >
+              <Avatar
+                sx={{
+                  height: 64,
+                  width: 64
+                }}
+              >
+                {data.name?.charAt(0).toUpperCase()}
+              </Avatar>
               <Stack spacing={1}>
-                <Typography gutterBottom variant="subtitle1">
-                  Make Contact Info Public
+                <Typography variant="h4">
+                  {formik.values.name}
                 </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  Means that anyone viewing your profile will be able to see
-                  your contacts details
-                </Typography>
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  spacing={1}
+                >
+                  <Typography variant="subtitle2">
+                    ID:
+                  </Typography>
+                  <ClipboardChip
+                    label={displayId}
+                    size="small"
+                  />
+                </Stack>
               </Stack>
-              <Switch
-                checked={formik.values.isVerified}
-                color="primary"
-                edge="start"
-                name="isVerified"
-                onChange={formik.handleChange}
-                value={formik.values.isVerified}
-              />
             </Stack>
-            <Stack
-              alignItems="center"
-              direction="row"
-              justifyContent="space-between"
-              spacing={3}
+
+          </Stack>
+          <div>
+            <Tabs
+              indicatorColor="primary"
+              onChange={handleTabsChange}
+              scrollButtons="auto"
+              textColor="primary"
+              value={currentTab}
+              variant="scrollable"
             >
-              <Stack spacing={1}>
-                <Typography gutterBottom variant="subtitle1">
-                  Available to hire
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  Toggling this will let your teammates know that you are
-                  available for acquiring new projects
-                </Typography>
-              </Stack>
-              <Switch
-                checked={formik.values.hasDiscount}
-                color="primary"
-                edge="start"
-                name="hasDiscount"
-                onChange={formik.handleChange}
-                value={formik.values.hasDiscount}
-              />
-            </Stack>
-          </Stack> */}
-        </CardContent>
-        <Stack
-          direction={{
-            xs: "column",
-            sm: "row",
-          }}
-          flexWrap="wrap"
-          spacing={3}
-          sx={{ p: 3 }}
-        >
-          <Button
-            disabled={formik.isSubmitting}
-            type={current === "Edit" ? "Update" : "Create"}
-            variant="contained"
-          >
-            Update
-          </Button>
-          <Button
-            color="inherit"
-            component={RouterLink}
-            disabled={formik.isSubmitting}
-            href={paths.dashboard.customers.details}
-          >
-            Cancel
-          </Button>
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.value}
+                  label={tab.label}
+                  value={tab.value}
+                />
+              ))}
+            </Tabs>
+            <Divider />
+          </div>
         </Stack>
-      </Card>
-    </form>
+
+        {currentTab === "details" && (
+          <div>
+            <Stack
+              sx={{ my: 2 }}
+              justifyContent="flex-end"
+              direction="row"
+            >
+              {!unlockedEdit && !isLimitedUser &&
+                <Button
+                  size="large"
+                  variant="text"
+                  onClick={changeMode}
+                >
+                  Edit Details
+                </Button>
+              }
+            </Stack>
+            <Grid
+              container
+              spacing={4}
+            >
+              <Grid
+                xs={12}
+                lg={4}
+              >
+                <CustomerPersonalDetails formik={formik} unlockedEdit={unlockedEdit} orientation="vertical" />
+                <div className="hidden lg:block">
+                  <FormButtons
+                    unlockedEdit={unlockedEdit}
+                    formik={formik}
+                    current={"Edit"}
+                    handleCancel={() => changeMode()}
+                    handleSubmit={() => formik.submitForm()}
+                    sx={{ mt: 3 }}
+                  />
+                </div>
+
+              </Grid>
+              <Grid
+                xs={12}
+                lg={8}
+              >
+                <Stack spacing={4}>
+                  <CustomerBasicDetails formik={formik} unlockedEdit={unlockedEdit} formOptions={formOptions} orientation="vertical" />
+                  <CustomerDocuments
+                    files={files}
+                    orientation="vertical"
+                    // handleFilesUpload={handleDocumentsUpload}
+                    handleFilesDrop={handleFilesDrop}
+                    handleFileRemove={handleFileRemove}
+                    handleFilesRemoveAll={() => setFiles([])}
+                    unlockedEdit={unlockedEdit}
+                  />
+                  <CustomerAgentDetails formik={formik} unlockedEdit={unlockedEdit} formOptions={formOptions} />
+                  <CustomerDataManagement formik={formik} unlockedEdit={unlockedEdit} handleDelete={() => setIsDialogOpen(true)} />
+                  <div className="block lg:hidden">
+                    <FormButtons
+                      unlockedEdit={unlockedEdit}
+                      formik={formik}
+                      current={"Edit"}
+                      handleCancel={() => changeMode()}
+                      handleSubmit={() => formik.submitForm()}
+                      sx={{ mt: 3 }}
+                    />
+                  </div>
+                </Stack>
+              </Grid>
+            </Grid>
+          </div>
+        )}
+
+        <ConfirmationDialog
+          modelName={"Customer"}
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          handleDelete={handleDelete}
+          isSubmitting={formik.isSubmitting}
+        />
+
+      </form>
+
+      {currentTab === "properties" && <CustomerProperties data={data} id={id} />}
+      {/* {currentTab === 'comments' && (
+        <Stack spacing={2}>
+          <TaskComment
+            // key={comment.id}
+            // comment={comment}
+            pageName="Customer"
+            id={id}
+          />
+        </Stack>
+      )} */}
+    </>
   );
 };

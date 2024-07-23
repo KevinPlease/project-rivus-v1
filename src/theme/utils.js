@@ -1,4 +1,4 @@
-import { blue, green, indigo, purple, darkBlue, darkBlueWithGold } from './colors';
+import { blue, green, indigo, purple } from './colors';
 
 export const getPrimary = (preset) => {
   switch (preset) {
@@ -8,10 +8,6 @@ export const getPrimary = (preset) => {
       return green;
     case 'indigo':
       return indigo;
-    case 'darkBlue':
-      return darkBlue;
-    case 'darkBlueWithGold':
-      return darkBlueWithGold;
     case 'purple':
       return purple;
     default:

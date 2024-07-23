@@ -28,7 +28,6 @@ export const createComponents = ({ palette }) => {
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: palette.neutral[800],
           [`&.${paperClasses.elevation1}`]: {
             boxShadow: '0px 5px 22px rgba(0, 0, 0, 0.08), 0px 0px 0px 0.5px rgba(0, 0, 0, 0.06)'
           }
@@ -136,7 +135,6 @@ export const createComponents = ({ palette }) => {
     MuiTableCell: {
       styleOverrides: {
         root: {
-          backgroundColor: palette.neutral[800],
           borderBottomColor: palette.divider
         }
       }
@@ -148,13 +146,6 @@ export const createComponents = ({ palette }) => {
             backgroundColor: palette.neutral[800],
             color: palette.neutral[400]
           }
-        }
-      }
-    },
-    MuiTablePagination: {
-      styleOverrides: {
-        root: {
-          backgroundColor: palette.neutral[800]
         }
       }
     },

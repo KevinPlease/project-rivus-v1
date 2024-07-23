@@ -353,17 +353,7 @@ export const createComponents = () => {
     MuiTextField: {
       defaultProps: {
         variant: 'filled'
-      },
-      styleOverrides: {
-        root: {
-          input: {
-            "&:-webkit-autofill": {
-              WebkitBoxShadow: "0 0 0 100px transparent inset",
-                WebkitTextFillColor: "default",
-            },
-          },
-        },
-      },
+      }
     }
   };
 };

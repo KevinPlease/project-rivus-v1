@@ -56,7 +56,7 @@ export const DetailList8 = () => (
                     href="#"
                     variant="subtitle2"
                   >
-                    Rivus
+                    Ubrix
                   </Link>
                 </Typography>
               )}

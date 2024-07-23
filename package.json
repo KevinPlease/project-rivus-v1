@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cd server && npm run build && cd.. && node --inspect ./server/bin/Application.js",
+    "dev": "cd server && npm run nextDev",
+    "start": "cd server && npm run nextStart",
     "build": "next build",
-    "start": "cd server && npm run build && cd.. && node ./server/bin/Application.js",
     "export": "next export",
     "lint": "next lint",
     "lint-fix": "next lint --fix"

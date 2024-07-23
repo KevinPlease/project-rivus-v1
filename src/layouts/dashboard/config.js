@@ -119,8 +119,8 @@ export const useSections = () =>
             // ]
           },
           {
-            title: t(tokens.nav.clients),
-            path: paths.dashboard.clients.index,
+            title: t(tokens.nav.customers),
+            path: paths.dashboard.customers.index,
             icon: (
               <SvgIcon fontSize="small">
                 <Users03Icon />

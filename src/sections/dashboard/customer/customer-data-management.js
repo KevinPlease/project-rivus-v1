@@ -5,7 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 
-export const CustomerDataManagement = ({changeMode, isEdit}) => (
+export const CustomerDataManagement = ({ formik, handleDelete, unlockedEdit }) => (
   <Card>
     <CardHeader title="Data Management" />
     <CardContent sx={{ pt: 0 }}>
@@ -13,8 +13,10 @@ export const CustomerDataManagement = ({changeMode, isEdit}) => (
         <Button
             color="error"
             variant="outlined"
+            disabled={formik.isSubmitting || !unlockedEdit}
+            onClick={handleDelete}
         >
-          Delete Client
+          Delete Customer
         </Button>
       </div>
 
@@ -23,9 +25,9 @@ export const CustomerDataManagement = ({changeMode, isEdit}) => (
           color="text.secondary"
           variant="body2"
         >
-          Remove this client’s chart if he requested that, if not
-          please be aware that what has been deleted can never brought
-          back
+          Completely remove this customer’s data!
+          Please be aware that what has been deleted can never brought
+          back!
         </Typography>
       </Box>
     </CardContent>

@@ -17,6 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Unstable_Grid2";
 import Stack from "@mui/material/Stack";
+import AutocompleteComponent from "../../components/inputs/AutocompleteComponent";
 
 export const CustomerPayment = ({formik, disabled, formOptions}) => {
     const mdUp = useMediaQuery((theme) => theme.breakpoints.up('md'));
@@ -52,7 +53,7 @@ export const CustomerPayment = ({formik, disabled, formOptions}) => {
                                 }}
                                 readOnly={disabled}
                                 placeholder="Write something"
-                                sx={{height: 200, resize: "vertical"}}
+                                sx={{height: 400}}
                                 value={formik.values.description}
                             />
                             {!!(formik.touched.description && formik.errors?.description) && (
@@ -63,25 +64,12 @@ export const CustomerPayment = ({formik, disabled, formOptions}) => {
                                 </Box>
                             )}
                         </div>
-                        <TextField
-                            error={!!(formik.touched.assignee && formik.errors?.assignee)}
-                            fullWidth
-                            helperText={formik.touched.assignee && formik.errors?.assignee}
-                            label="Agent"
-                            name="assignee"
-                            disabled={disabled}
-                            onBlur={formik.handleBlur}
-                            onChange={formik.handleChange}
-                            select
-                            required
-                            value={formik.values.assignee}
-                        >
-                            {formOptions?.assignee?.map((option) => (
-                                <MenuItem key={option._id} value={option._id}>
-                                    {option.data.name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                        <AutocompleteComponent
+                            formik={formik}
+                            options={formOptions?.assignee}
+                            fieldName="assignee"
+                            placeholder="Agent"
+                        />
                     </Stack>
                 </Grid>
             </CardContent>
