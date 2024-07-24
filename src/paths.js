@@ -8,9 +8,6 @@ export const paths = {
   dashboard: {
     index: '/dashboard',
     account: '/dashboard/account',
-    calendar: '/dashboard/calendar',
-    chat: '/dashboard/chat',
-    crypto: '/dashboard/crypto',
     customers: {
       index: '/dashboard/customers',
       create: '/dashboard/customers/create',

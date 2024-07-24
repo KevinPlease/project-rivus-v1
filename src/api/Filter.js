@@ -20,7 +20,7 @@ class Filter {
       fieldName = ExString.deprefix(fieldName, "ranged_");
     } else if (Array.isArray(searchValue)) {
       values = searchValue;
-    } else if (typeof searchValue === "object") {   // NOTE: case of nested objects like filters.details.bedroomCount.from
+    } else if (typeof searchValue === "object") {   // NOTE: case of nested objects like filters.bedroomCount.from
 
       for (let innerFName in searchValue) {
         const innerSearchVal = searchValue[innerFName];

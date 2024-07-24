@@ -238,22 +238,6 @@ export const SideNav = (props) => {
             {/*  >*/}
             {/*    Please check our docs.*/}
             {/*  </Typography>*/}
-            {user && REPORTING_ROLES.includes(user.data.role._id) &&
-              <Button
-                component="a"
-                fullWidth
-                href={paths.docs}
-                startIcon={(
-                  <SvgIcon>
-                    <ReportOutlinedIcon />
-                  </SvgIcon>
-                )}
-                target="_blank"
-                variant="contained"
-              >
-                Report an Issue
-              </Button>
-            }
           </Box>
         </Stack>
       </Scrollbar>

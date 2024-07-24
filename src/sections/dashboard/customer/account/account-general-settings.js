@@ -69,10 +69,8 @@ export const AccountGeneralSettings = ({ user }) => {
     enableReinitialize: true,
     initialValues: {
       name: user?.data.name || "",
-      details: {
-        email: user?.data.details.email || "",
-        phone: user?.data.details.phone || "",
-      },
+      email: user?.data.email || "",
+      phone: user?.data.phone || "",
       submit: null
     },
     // validationSchema,
@@ -253,7 +251,7 @@ export const AccountGeneralSettings = ({ user }) => {
                     >
                       <TextField
                         disabled
-                        defaultValue={user?.data.details.username}
+                        defaultValue={user?.username}
                         label="Username"
                         sx={{ flexGrow: 1 }}
                       />
@@ -280,11 +278,11 @@ export const AccountGeneralSettings = ({ user }) => {
                     >
                       <TextField
                         disabled={!isEditing}
-                        error={!!(formik.touched.details?.phone && formik.errors?.phone)}
-                        name="details.phone"
+                        error={!!(formik.touched?.phone && formik.errors?.phone)}
+                        name="phone"
                         onBlur={formik.handleBlur}
                         onChange={formik.handleChange}
-                        value={formik.values.details.phone}
+                        value={formik.values.phone}
                         required
                         label="Phone Number"
                         sx={{ flexGrow: 1 }}
@@ -314,11 +312,11 @@ export const AccountGeneralSettings = ({ user }) => {
                       spacing={2}
                     >
                       <TextField
-                        error={!!(formik.touched.details?.email && formik.errors?.email)}
-                        name="details.email"
+                        error={!!(formik.touched?.email && formik.errors?.email)}
+                        name="email"
                         onBlur={formik.handleBlur}
                         onChange={formik.handleChange}
-                        value={formik.values.details.email}
+                        value={formik.values.email}
                         disabled={!isEditing}
                         label="Email Address"
                         required

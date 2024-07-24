@@ -145,17 +145,7 @@ export const useSections = () =>
                 <ShoppingCart01Icon />
               </SvgIcon>
             ),
-            path: paths.dashboard.orders.index,
-            items: [
-              {
-                title: t(tokens.nav.list),
-                path: paths.dashboard.orders.index
-              },
-              {
-                title: t(tokens.nav.details),
-                path: paths.dashboard.orders.details
-              }
-            ]
+            path: paths.dashboard.orders.index
           },
           // {
           //   title: t(tokens.nav.invoiceList),

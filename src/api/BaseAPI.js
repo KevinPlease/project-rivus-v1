@@ -33,7 +33,7 @@ class BaseAPI {
   }
 
   static authForInfo(user) {
-    return { branch: user.branch, token: user.data.details.token };
+    return { branch: user.branch, token: user.data.token };
   }
 
   async getAll(authInfo, searchData) {

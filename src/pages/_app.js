@@ -17,10 +17,10 @@ import { SplashScreen } from "src/components/splash-screen";
 import { SettingsButton } from "src/components/settings/settings-button";
 import { SettingsDrawer } from "src/components/settings/settings-drawer";
 import { Toaster } from "src/components/toaster";
-import { gtmConfig } from "src/config";
+// import { gtmConfig } from "src/config";
 import { AuthConsumer, AuthProvider } from "src/contexts/auth/user";
 import { SettingsConsumer, SettingsProvider } from "src/contexts/settings";
-import { useAnalytics } from "src/hooks/use-analytics";
+// import { useAnalytics } from "src/hooks/use-analytics";
 import { useNprogress } from "src/hooks/use-nprogress";
 import { useTabCounter } from "src/hooks/use-tab-counter";
 import { STORAGE_KEY } from "src/contexts/auth/user/auth-provider";
@@ -35,7 +35,7 @@ const clientSideEmotionCache = createEmotionCache();
 
 const CustomApp = (props) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-  useAnalytics(gtmConfig);
+  // useAnalytics(gtmConfig);
   useNprogress();
 
   useTabCounter(() => {
