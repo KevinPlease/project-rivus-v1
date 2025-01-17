@@ -16,6 +16,8 @@ import BaseAPI from "src/api/BaseAPI";
 import { useRouter } from "next/router";
 import { ConfirmationDialog } from "src/sections/confirmation-dialog";
 import { useAuth } from "src/hooks/use-auth";
+import { showLoaderToast } from "src/slices/toast";
+import { useDispatch } from "react-redux";
 
 
 const REQUIRED = "Field is required";
@@ -25,47 +27,57 @@ const validationSchema = Yup.object({
   mobile: Yup.string().max(20).required(REQUIRED),
   personalId: Yup.string().max(255),
   email: Yup.string().max(255),
-  // birthdate: Yup.date(),
+  birthdate: Yup.date(),
   source: Yup.string().max(24),
   role: Yup.string().max(255),
   assignee: Yup.string().max(24).required(REQUIRED),
   description: Yup.string().max(500)
 });
 
-export const CustomerCreateForm = ({ customerData, id, formOptions }) => {
+export const CustomerCreateForm = ({ formOptions }) => {
   const { user } = useAuth();
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [files, setFiles] = useState([]);
 
+  const createFileDetails = useCallback((doc) => {
+    const file = doc.file;
+    return {
+      url: doc.url,
+      src: doc.src,
+      isImg: doc.isImg, 
+      name: doc.name,
+      isRemoved: doc.isRemoved,
+      file: { name: file.name, size: file.size, type: file.type }
+    };
+  }, []);
+
   const formik = useFormik({
     // enableReinitialize: true,
     initialValues: {
-      name: customerData.name || "",
-      title: customerData.title || "",
-      mobile: customerData.mobile || "",
-      email: customerData.email || "",
-      birthdate: customerData.birthdate ? new Date(customerData.birthdate) :null,
-      address: customerData.address || "",
-      personalId: customerData.personalId || "",
-      assignee: customerData.assignee || user?._id || "",
-      description: customerData.description || "",
-      // documents: customerData.documents || [],
+      name: "",
+      title: "",
+      mobile: "",
+      email: "",
+      birthdate: new Date(Date.now()),
+      address: "",
+      personalId: "",
+      assignee: "",
+      description: ""
     },
     validationSchema,
     onSubmit: async (values, helpers) => {
-      const loaderId = toast.loading("Updating customer...");
-      values.isDraft = false;
-      values.title = values.title.toUpperCase();
-      await handleDocumentsUpload(files)
+      helpers.setSubmitting(true);
+      values.documents = files.filter(doc => doc.file !== undefined).map(createFileDetails);
+      
+      const uploads = await handleUploads();
+      values.documents = uploads.documents;
       const authInfo = BaseAPI.authForInfo(user);
-      const response = await customerAPI.update(authInfo, id, values);
-
-      toast.dismiss(loaderId);
+      const response = await customerAPI.create(authInfo, values);
       if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: err.message });
+        helpers.setErrors({ submit: response.data });
         helpers.setSubmitting(false);
         return;
       }
@@ -76,14 +88,6 @@ export const CustomerCreateForm = ({ customerData, id, formOptions }) => {
       router.push(paths.dashboard.customers.index);
     },
   });
-
-  useEffect(() => {
-    setFiles((prevFiles) => {
-      if (!customerData.documents) return prevFiles;
-
-      return [...prevFiles, ...customerData.documents];
-    });
-  }, [customerData]);
 
   const handleFilesDrop = useCallback((newFiles) => {
     setFiles((prevFiles) => {
@@ -104,48 +108,48 @@ export const CustomerCreateForm = ({ customerData, id, formOptions }) => {
     setFiles([]);
   }, []);
 
-  const handleDocumentsUpload = useCallback(async (allDocuments) => {
+  const handleDocumentsUpload = useCallback(() => {
+    const docFiles = files.filter(doc => doc.file !== undefined).map(doc => doc.file);
+    const authInfo = BaseAPI.authForInfo(user);
+    return customerAPI.uploadDocuments(authInfo, undefined, docFiles);
+  }, [files, user]);
+
+  const handleUploads = useCallback(async () => {
+    const response = { documents: [] };
+    if (files.length === 0) return response;
+
     try {
-      formik.setSubmitting(true);
-      const docFiles = allDocuments.map(docDetail => docDetail.file).filter(docFile => docFile !== undefined);
-      const authInfo = BaseAPI.authForInfo(user);
-      const response = await customerAPI.uploadDocuments(authInfo, id, docFiles);
-      if (response.status === "success") {
-        formik.setErrors(null);
-        formik.setSubmitting(false);
-        return
-      }
+      const documentResponse = await handleDocumentsUpload();
+      if (documentResponse.status === "success") response.documents = documentResponse.data;
 
-      const errMsg = "There was a problem uploading documents!";
-      formik.setErrors({ documents: errMsg });
-      formik.setSubmitting(false);
-      toast(errMsg);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
+      toast.error("There was a problem uploading images!");
+
+    } finally {
+      return response;
     }
-  }, [id]);
 
+    // const toastInfo = {
+    //   promise: handleDocumentsUpload(),
+    //   messages: {
+    //     loading: "Uploading files...",
+    //     success: "Files uploaded successfully!",
+    //     error: "There was a problem uploading the files!"
+    //   },
+    //   config: {
+    //     success: {
+    //       duration: 3000
+    //     }
+    //   }
+    // };
+
+    // dispatch(showLoaderToast(toastInfo));
+  }, [files]);
 
   const handleCancel = useCallback((event) => {
     return router.push(paths.dashboard.customers.index);
   }, []);
-
-
-  const handleDelete = useCallback(async (event) => {
-    const authInfo = BaseAPI.authForInfo(user);
-    const response = await customerAPI.delete(authInfo, id);
-
-    let status = "success";
-    let message = "Customer Deleted!";
-    if (response.status === "failure") {
-      status = "error";
-      message = "Something went wrong!";
-    }
-
-    formik.setSubmitting(false);
-    toast[status](message);
-    router.replace(paths.dashboard.customers.index);
-  }, [id, router]);
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -189,7 +193,6 @@ export const CustomerCreateForm = ({ customerData, id, formOptions }) => {
         modelName={"Customer"}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        handleDelete={handleDelete}
         isSubmitting={formik.isSubmitting}
       />
 

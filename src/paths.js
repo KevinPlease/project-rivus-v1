@@ -11,18 +11,22 @@ export const paths = {
     customers: {
       index: '/dashboard/customers',
       create: '/dashboard/customers/create',
-      details: '/dashboard/customers/:id',
-      edit: '/dashboard/customers/:id/edit'
+      details: '/dashboard/customers/:id'
     },
     orders: {
       index: '/dashboard/orders',
+      create: '/dashboard/orders/create',
       details: '/dashboard/orders/:id'
     },
-    properties: {
-      index: '/dashboard/properties',
-      create: '/dashboard/properties/create',
-      details: '/dashboard/properties/:id',
-      edit: '/dashboard/properties/:id/edit'
+    users: {
+      index: '/dashboard/users',
+      create: '/dashboard/users/create',
+      details: '/dashboard/users/:id'
+    },
+    roles: {
+      index: '/dashboard/roles',
+      create: '/dashboard/roles/create',
+      details: '/dashboard/roles/:id'
     }
   },
   notAuthorized: '/401',

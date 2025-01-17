@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import { useFormik } from "formik";
-import PropTypes from "prop-types";
+import * as Yup from "yup";
 import Camera01Icon from "@untitled-ui/icons-react/build/esm/Camera01";
 import User01Icon from "@untitled-ui/icons-react/build/esm/User01";
 import { alpha } from "@mui/system/colorManipulator";
@@ -14,78 +14,47 @@ import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Unstable_Grid2";
 import Stack from "@mui/material/Stack";
 import SvgIcon from "@mui/material/SvgIcon";
-import { Modal, Slider } from "@mui/material";
-import AvatarEditor from "react-avatar-editor";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Edit02Icon from '@untitled-ui/icons-react/build/esm/Edit02';
 
 import { FormButtons } from "src/sections/form-buttons";
 import { toImageDetails } from "src/utils/files-to-imagedetails";
 import BaseAPI from "src/api/BaseAPI";
 import userAPI from "src/api/user";
+import { CropperModal } from "src/components/modals/CroppedModal";
+import { useAuth } from "src/hooks/use-auth";
+import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
 
-// const REQUIRED = "Field is required!";
-// const validationSchema = Yup.object({
-//   name: Yup.string().max(255).required(REQUIRED),
-//   email: Yup.string().max(255).required(REQUIRED),
-//   phone: Yup.string().max(255).required(REQUIRED)
-// });
+const REQUIRED = "Field is required!";
+const validationSchema = Yup.object({
+  name: Yup.string().max(255).required(REQUIRED),
+  email: Yup.string().max(255).required(REQUIRED),
+  phone: Yup.string().max(255).required(REQUIRED)
+});
 
-const boxStyle = {
-  width: "300px",
-  height: "300px",
-  display: "flex",
-  flexFlow: "column",
-  justifyContent: "center",
-  alignItems: "center"
-};
-const modalStyle = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center"
-};
-export const AccountGeneralSettings = ({ user }) => {
-  const [isEditing, setIsEditing] = useState(false);
+export const UserCreateEditForm = ({ current, model, formOptions, ...props }) => {
+  const { user } = useAuth()
+  const { _id: id, data, displayId } = model;
+  const [unlockedEdit, setUnlockedEdit] = useState(current === "Create");
   const [image, setImage] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  // ref to control input element
-  // handle Click
-
-  const handleImageDrop = useCallback((newImages) => {
-    const imgDetails = toImageDetails(newImages);
-    setImage(imgDetails[0]);
-    setModalOpen(true);
-  }, []);
-
-  useEffect(() => {
-    if (!user?.data.image) return;
-
-    setImage(user.data.image);
-  }, [user]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleImageDrop });
+  const [modalOpen, setModalOpen] = useState(false)
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: user?.data.name || "",
-      email: user?.data.email || "",
-      phone: user?.data.phone || "",
-      submit: null
+      name: data.name || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      password: data.password || ""
     },
-    // validationSchema,
+    validationSchema,
     onSubmit: async (values, helpers) => {
       const authInfo = BaseAPI.authForInfo(user);
-      const imageResponse = await handleImagesUpload([image]);
-      if (imageResponse === "failure") {
-        toast.error("Probleming uploading image!");
-        helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: "Probleming uploading image!" });
-        helpers.setSubmitting(false);
-        return;
-
-      }
-      const response = await userAPI.updateSelf(authInfo, values);
+      
+      if (image) values.images = await handleImagesUpload([image]);
+      
+      const response = await userAPI.update(authInfo, id, values);
       if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
@@ -97,41 +66,77 @@ export const AccountGeneralSettings = ({ user }) => {
       helpers.setStatus({ success: true });
       helpers.setSubmitting(false);
       toast.success("User updated!");
-      setIsEditing((prevState) => !prevState);
+      setUnlockedEdit((prevState) => !prevState);
     }
   });
+
+  useEffect(() => {
+    if (!data.images || data.images?.length === 0) return;
+
+    setImage(data.images[0]);
+  }, [data]);
+
+  const handleImageDrop = useCallback((newImages) => {
+    const imgDetails = toImageDetails(newImages);
+    setImage(imgDetails[0]);
+    setModalOpen(true);
+  }, []);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleImageDrop });
 
   const handleImagesUpload = useCallback(async (allImages) => {
     try {
       const imageFiles = allImages.map(imgDetail => imgDetail.file).filter(imgFile => imgFile !== undefined);
       const authInfo = BaseAPI.authForInfo(user);
-      const response = await userAPI.uploadImages(authInfo, user._id, imageFiles);
-      if (response.status === "success") return response.status;
+      const response = await userAPI.uploadImages(authInfo, id, imageFiles);
+      if (response.status === "success") return response.data;
 
-      toast("There was a problem uploading images!");
-      return "failure";
+      toast.error("There was a problem uploading images!");
+      return [];
+
     } catch (err) {
       console.error(err);
+      return [];
     }
-  }, [user]);
+  }, [id, user]);
 
-  const handleEdit = useCallback(() => {
-    setIsEditing((prevState) => !prevState);
-  }, []);
 
   const handleCancel = useCallback(() => {
     formik.resetForm();
-    setIsEditing((prevState) => !prevState);
+    setUnlockedEdit((prevState) => !prevState);
   }, []);
 
   return (
-    <Stack spacing={4}>
-      <div className={`ml-auto mr-2 ${isEditing ? "hidden" : ""}`}>
-        <Button onClick={handleEdit}>
-          Edit
-        </Button>
-      </div>
-
+    <Stack>
+      <Stack
+        alignItems="center"
+        direction="row"
+        spacing={1}
+      >
+        <Typography variant="subtitle2">
+          ID:
+        </Typography>
+        <ClipboardChip
+          label={displayId}
+          size="small" />
+      </Stack>
+      <Stack flex="flex" flexDirection="row" justifyContent="flex-end">
+        {!unlockedEdit &&
+          <Button
+            size="large"
+            variant="text"
+            disabled={formik.isSubmitting}
+            startIcon={(
+              <SvgIcon>
+                <Edit02Icon />
+              </SvgIcon>
+            )}
+            onClick={() => {
+              setUnlockedEdit(prevState => !prevState);
+              formik.setSubmitting("");
+            }}>
+            Ndrysho
+          </Button>}
+      </Stack>
       <form onSubmit={formik.handleSubmit}>
         <Stack spacing={2}>
           <Card>
@@ -194,24 +199,21 @@ export const AccountGeneralSettings = ({ user }) => {
                                 backgroundColor: "action.active",
                                 opacity: 0.5
                               }),
-                              ...(isEditing && {
+                              ...(unlockedEdit && {
                                 cursor: "pointer"
                               }),
-                              ...(isEditing && {
+                              ...(unlockedEdit && {
                                 "&:hover": {
                                   opacity: 1
                                 }
                               })
                             }}
-                            {...(isEditing ? getRootProps() : {})}>
-                            {isEditing &&
+                            {...(unlockedEdit ? getRootProps() : {})}>
+                            {unlockedEdit &&
                               <input
                                 {...getInputProps()}
                                 multiple={false}
-                                accept={{ "image/*": [] }}
-                                // onChange={handleImageDrop}
-                              />
-                            }
+                                accept={{ "image/*": [] }} />}
                             <Stack
                               alignItems="center"
                               direction="row"
@@ -251,10 +253,9 @@ export const AccountGeneralSettings = ({ user }) => {
                     >
                       <TextField
                         disabled
-                        defaultValue={user?.username}
+                        defaultValue={data.username}
                         label="Username"
-                        sx={{ flexGrow: 1 }}
-                      />
+                        sx={{ flexGrow: 1 }} />
 
                     </Stack>
                     <Stack
@@ -266,9 +267,7 @@ export const AccountGeneralSettings = ({ user }) => {
                         disabled
                         defaultValue={user?.branch}
                         label="Branch"
-                        sx={{ flexGrow: 1 }}
-                      />
-
+                        sx={{ flexGrow: 1 }} />
                     </Stack>
 
                     <Stack
@@ -277,7 +276,7 @@ export const AccountGeneralSettings = ({ user }) => {
                       spacing={2}
                     >
                       <TextField
-                        disabled={!isEditing}
+                        disabled={!unlockedEdit}
                         error={!!(formik.touched?.phone && formik.errors?.phone)}
                         name="phone"
                         onBlur={formik.handleBlur}
@@ -285,8 +284,7 @@ export const AccountGeneralSettings = ({ user }) => {
                         value={formik.values.phone}
                         required
                         label="Phone Number"
-                        sx={{ flexGrow: 1 }}
-                      />
+                        sx={{ flexGrow: 1 }} />
                     </Stack>
                     <Stack
                       alignItems="center"
@@ -294,7 +292,7 @@ export const AccountGeneralSettings = ({ user }) => {
                       spacing={2}
                     >
                       <TextField
-                        disabled={!isEditing}
+                        disabled={!unlockedEdit}
                         error={!!(formik.touched.name && formik.errors?.name)}
                         name="name"
                         onBlur={formik.handleBlur}
@@ -302,8 +300,7 @@ export const AccountGeneralSettings = ({ user }) => {
                         value={formik.values.name}
                         required
                         label="Full Name"
-                        sx={{ flexGrow: 1 }}
-                      />
+                        sx={{ flexGrow: 1 }} />
 
                     </Stack>
                     <Stack
@@ -317,7 +314,7 @@ export const AccountGeneralSettings = ({ user }) => {
                         onBlur={formik.handleBlur}
                         onChange={formik.handleChange}
                         value={formik.values.email}
-                        disabled={!isEditing}
+                        disabled={!unlockedEdit}
                         label="Email Address"
                         required
                         sx={{
@@ -325,21 +322,75 @@ export const AccountGeneralSettings = ({ user }) => {
                           "& .MuiOutlinedInput-notchedOutline": {
                             borderStyle: "dashed"
                           }
-                        }}
-                      />
+                        }} />
+                    </Stack>
+                    <Stack
+                      alignItems="center"
+                      direction="row"
+                      spacing={2}
+                    >
+                      <TextField
+                        disabled={!unlockedEdit}
+                        error={!!(formik.touched?.password && formik.errors?.password)}
+                        name="password"
+                        onBlur={formik.handleBlur}
+                        onChange={formik.handleChange}
+                        value={formik.values.password}
+                        required={current !== "Edit"}
+                        type="password"
+                        label="Password"
+                        sx={{ flexGrow: 1 }} />
                     </Stack>
                   </Stack>
                 </Grid>
               </Grid>
             </CardContent>
           </Card>
+          {current === 'Edit' && (
+            <Card>
+              <CardContent>
+                <Grid
+                  container
+                  spacing={3}
+                >
+                  <Grid
+                    xs={12}
+                    md={4}
+                  >
+                    <Typography variant="h6">
+                      Fshi Perdoruesin
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    xs={12}
+                    md={8}
+                  >
+                    <Stack
+                      alignItems="flex-start"
+                      spacing={3}
+                    >
+                      <Typography variant="subtitle1">
+                        Fshi perdoruesin me gjithe informacionet. Kjo nuk kthehet mbrapsht!
+                      </Typography>
+                      <Button
+                        color="error"
+                        variant="outlined"
+                      >
+                        FSHI
+                      </Button>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          )}
+
           <FormButtons
-            unlockedEdit={isEditing}
+            unlockedEdit={unlockedEdit}
             formik={formik}
             current="Edit"
             handleSubmit={formik.submitForm}
-            handleCancel={handleCancel}
-          />
+            handleCancel={handleCancel} />
         </Stack>
       </form>
       {/*<Card>*/}
@@ -410,42 +461,6 @@ export const AccountGeneralSettings = ({ user }) => {
       {/*    </Grid>*/}
       {/*  </CardContent>*/}
       {/*</Card>*/}
-      <Card>
-        {/* <CardContent>
-          <Grid
-            container
-            spacing={3}
-          >
-            <Grid
-              xs={12}
-              md={4}
-            >
-              <Typography variant="h6">
-                Delete Account
-              </Typography>
-            </Grid>
-            <Grid
-              xs={12}
-              md={8}
-            >
-              <Stack
-                alignItems="flex-start"
-                spacing={3}
-              >
-                <Typography variant="subtitle1">
-                  Delete your account and all of your source data. This is irreversible.
-                </Typography>
-                <Button
-                  color="error"
-                  variant="outlined"
-                >
-                  Delete account
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-        </CardContent> */}
-      </Card>
       <CropperModal
         modalOpen={modalOpen}
         src={image?.src}
@@ -455,81 +470,4 @@ export const AccountGeneralSettings = ({ user }) => {
     </Stack>
   );
 };
-const CropperModal = ({ src, modalOpen, setModalOpen, setImage }) => {
-  const [slideValue, setSlideValue] = useState(10);
-  const cropRef = useRef(null);
 
-  //handle save
-  const handleSave = async () => {
-    if (cropRef) {
-      const dataUrl = cropRef.current.getImage().toDataURL();
-      const result = await fetch(dataUrl);
-      const blob = await result.blob();
-      const file = new File([blob], 'cropped_image.png', { type: blob.type });
-      setImage({ file, src: URL.createObjectURL(blob), isImg: true });
-      setModalOpen(false);
-    }
-  };
-
-  return (
-    <Modal sx={modalStyle} open={modalOpen}>
-      <Box sx={boxStyle}>
-        <AvatarEditor
-          ref={cropRef}
-          image={src}
-          style={{ width: "100%", height: "100%" }}
-          border={50}
-          borderRadius={150}
-          color={[0, 0, 0, 0.72]}
-          scale={slideValue / 10}
-          rotate={0}
-        />
-
-        {/* MUI Slider */}
-        <Slider
-          min={10}
-          max={50}
-          sx={{
-            margin: "0 auto",
-            width: "80%",
-            color: "cyan"
-          }}
-          size="medium"
-          defaultValue={slideValue}
-          value={slideValue}
-          onChange={(e) => setSlideValue(e.target.value)}
-        />
-        <Box
-          sx={{
-            display: "flex",
-            padding: "10px",
-            border: "3px solid white",
-            background: "black"
-          }}
-        >
-          <Button
-            size="small"
-            sx={{ marginRight: "10px", color: "white", borderColor: "white" }}
-            variant="outlined"
-            onClick={(e) => setModalOpen(false)}
-          >
-            cancel
-          </Button>
-          <Button
-            sx={{ background: "#5596e6" }}
-            size="small"
-            variant="contained"
-            onClick={handleSave}
-          >
-            Save
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
-};
-AccountGeneralSettings.propTypes = {
-  avatar: PropTypes.string,
-  email: PropTypes.string,
-  name: PropTypes.string
-};

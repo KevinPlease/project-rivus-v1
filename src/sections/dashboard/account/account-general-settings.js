@@ -18,6 +18,7 @@ import { Modal, Slider } from "@mui/material";
 import AvatarEditor from "react-avatar-editor";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Edit02Icon from "@untitled-ui/icons-react/build/esm/Edit02";
 
 import { FormButtons } from "src/sections/form-buttons";
 import { toImageDetails } from "src/utils/files-to-imagedetails";
@@ -58,9 +59,9 @@ export const AccountGeneralSettings = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    if (!user?.data.image) return;
+    if (!user?.data.images[0]) return;
 
-    setImage(user.data.image);
+    setImage(user.data.images[0]);
   }, [user]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleImageDrop });
@@ -70,22 +71,21 @@ export const AccountGeneralSettings = ({ user }) => {
     initialValues: {
       name: user?.data.name || "",
       email: user?.data.email || "",
-      phone: user?.data.phone || "",
-      submit: null
+      phone: user?.data.phone || ""
     },
     // validationSchema,
     onSubmit: async (values, helpers) => {
       const authInfo = BaseAPI.authForInfo(user);
       const imageResponse = await handleImagesUpload([image]);
       if (imageResponse === "failure") {
-        toast.error("Probleming uploading image!");
+        toast.error("Problem uploading image!");
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: "Probleming uploading image!" });
+        helpers.setErrors({ submit: "Problem uploading image!" });
         helpers.setSubmitting(false);
         return;
 
       }
-      const response = await userAPI.updateSelf(authInfo, values);
+      const response = await userAPI.update(authInfo, user?._id, values);
       if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
@@ -126,11 +126,21 @@ export const AccountGeneralSettings = ({ user }) => {
 
   return (
     <Stack spacing={4}>
-      <div className={`ml-auto mr-2 ${isEditing ? "hidden" : ""}`}>
-        <Button onClick={handleEdit}>
-          Edit
-        </Button>
-      </div>
+     <Stack flex="flex" flexDirection="row" justifyContent="flex-end">
+        {!isEditing &&
+          <Button
+            size="large"
+            variant="text"
+            disabled={formik.isSubmitting}
+            startIcon={(
+              <SvgIcon>
+                <Edit02Icon />
+              </SvgIcon>
+            )}
+            onClick={handleEdit}>
+            Ndrysho
+          </Button>}
+      </Stack>
 
       <form onSubmit={formik.handleSubmit}>
         <Stack spacing={2}>

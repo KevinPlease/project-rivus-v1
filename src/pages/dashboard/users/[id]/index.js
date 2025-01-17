@@ -1,17 +1,22 @@
+
 import Box from "@mui/material/Box";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Container from "@mui/material/Container";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useTranslation } from "react-i18next";
 
 import { BreadcrumbsSeparator } from "src/components/breadcrumbs-separator";
 import { RouterLink } from "src/components/router-link";
 import { Layout as DashboardLayout } from "src/layouts/dashboard";
+import { tokens } from "src/locales/tokens";
 import { paths } from "src/paths";
-import EditCreateProperty from "src/sections/dashboard/properties/edit-create-property";
+import EditCreateUser from "src/sections/dashboard/users/edit-create-user";
 
 const Page = () => {
+  const { t } = useTranslation();
+  
   return (
     <>
       <Box
@@ -22,9 +27,8 @@ const Page = () => {
         }}
       >
         <Container maxWidth="xl">
-          <Stack spacing={3}>
+          <Stack>
             <Stack spacing={1}>
-
               <Breadcrumbs separator={<BreadcrumbsSeparator />}>
                 <Link
                   color="text.primary"
@@ -32,28 +36,28 @@ const Page = () => {
                   href={paths.dashboard.index}
                   variant="subtitle2"
                 >
-                  Dashboard/
+                  {t(tokens.nav.overview)}/
                 </Link>
                 <Link
                   color="text.primary"
                   component={RouterLink}
-                  href={paths.dashboard.properties.index}
+                  href={paths.dashboard.users.index}
                   variant="subtitle2"
                 >
-                  Management
+                  {t(tokens.nav.management)}
                 </Link>
                 <Typography
                   color="text.secondary"
                   variant="subtitle2"
                 >
-                  Property
+                  {t(tokens.nav.user)}
                 </Typography>
               </Breadcrumbs>
               <Typography variant="h4">
-              Property Details
+                {t(tokens.nav.userDetails)}
               </Typography>
             </Stack>
-            <EditCreateProperty current="Create" />
+            <EditCreateUser current="Edit" />
           </Stack>
         </Container>
       </Box>

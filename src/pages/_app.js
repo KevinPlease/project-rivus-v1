@@ -27,7 +27,7 @@ import { STORAGE_KEY } from "src/contexts/auth/user/auth-provider";
 import { store } from "src/store";
 import { createTheme } from "src/theme";
 import { createEmotionCache } from "src/utils/create-emotion-cache";
-import "../globals.css"
+import "../globals.css";
 // Remove if locales are not used
 import "src/locales/i18n";
 

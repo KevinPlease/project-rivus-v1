@@ -89,15 +89,13 @@ export const CustomerBasicDetails = ({ formik, formOptions, unlockedEdit, orient
                 </Box>
               )}
 
-              {!orientation &&
-                <AutocompleteComponent
+              <AutocompleteComponent
                   formik={formik}
                   options={formOptions?.assignee}
                   fieldName="assignee"
                   unlockedEdit={unlockedEdit}
                   placeholder="Agent"
                 />
-              }
             </Stack>
           </Grid>
         </Grid>

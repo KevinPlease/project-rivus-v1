@@ -103,8 +103,8 @@ export const CustomerPersonalDetails = ({ formik, unlockedEdit, orientation = fa
                 value={formik?.values.birthdate}
                 onChange={date => formik?.setFieldValue("birthdate", date)}
                 onBlur={formik?.handleBlur}
-                // error={!!(formik?.touched.birthdate && formik.errors?.birthdate)}
-                // helperText={formik?.touched.birthdate && formik.errors?.birthdate}
+                error={!!(formik?.touched.birthdate && formik.errors?.birthdate)}
+                helperText={formik?.touched.birthdate && formik.errors?.birthdate}
               />
               <TextField
                 error={!!(formik?.touched.personalId && formik.errors?.personalId)}

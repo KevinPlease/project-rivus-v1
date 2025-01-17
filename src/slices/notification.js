@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    notifications: []
+    notifications: [],
+    formDetails: {}
 };
 
 const reducers = {
@@ -11,8 +12,8 @@ const reducers = {
     addNotifications(state, action) {
         const newNotifications = [...state.notifications];
 
-        for (const data of action.payload) {
-            const existingNotificationIndx = state.notifications.findIndex(notif => notif.id === data.id);
+        for (const data of action.payload.models) {
+            const existingNotificationIndx = state.notifications.findIndex(notif => notif._id === data._id);
             if (existingNotificationIndx !== -1) {
                 newNotifications.splice(existingNotificationIndx, 1, data);
             } else {
@@ -20,16 +21,28 @@ const reducers = {
             }
         }
 
+        state.formDetails = action.payload.formDetails;
         state.notifications = newNotifications;
-        reducers.resetNotifications(state);
     },
-    askQuickNotifications(state, action) {
+    setNotifications(state, action) {
+        state.formDetails = action.payload.formDetails;
+        state.notifications = action.payload.models;
     },
-    resetNotifications(state, action) {
+    markAs(isRead, state, action) {
+        const newNotifications = [...state.notifications];
+        const notificationId = action.payload._id;
+        const notification = newNotifications.find(notif => notif._id === notificationId);
+        if (notification) {
+            notification.isRead = isRead;
+        }
+        state.notifications = newNotifications;
     },
-    deleteAllNotifications(state, action) {
-        state.notifications = [];
+    markAsRead(state, action) {
+        reducers.markAs(true, state, action);
     },
+    markAsUnread(state, action) {
+        reducers.markAs(false, state, action);
+    }
 };
 
 export const slice = createSlice({
@@ -39,4 +52,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { addNotification, deleteAllNotifications, addNotifications, askQuickNotifications, resetNotifications } = slice.actions;
+export const { addNotification, addNotifications, setNotifications, markAsRead, markAsUnread } = slice.actions;

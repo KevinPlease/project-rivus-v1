@@ -1,44 +1,34 @@
 const Fields = {
+	AVAILABILITY: "availability",
 	DISPLAY_ID: "displayId",
 	TITLE: "title",
-	SOURCE: "source",
 	ASSIGNEE: "assignee",
 	ADDRESS: "address",
+	CUSTOMER: "customer",
 	OWNER: "owner",
-	BUSINESS_TYPE: "businessType",
+	BUILDER: "builder",
 	PROPERTY_TYPE: "propertyType",
+	UNIT_TYPE: "unitType",
 	COUNTRY: "country",
+	FLOOR_COUNT: "floorCount",
+	INTERIOR_AREA: "interiorArea",
+	LAND_AREA: "landArea",
+	GROSS_AREA: "grossArea",
 	FULL_NAME: "fullName",
 	NAME: "name",
 	CITY: "city",
 	ZONE: "zone",
 	PRICE: "price",
-	PRICE_FROM: "price.from",
-	PRICE_TO: "price.to",
-	AVAILABILITY: "availability",
-	HAS_MORTGAGE: "hasMortgage",
-	NO_MORTGAGE: "noMortgage",
+	UNITS: "unit",
+	PROPERTY: "property",
+	PRICE_FROM: "startPrice",
+	PRICE_TO: "endPrice",
+	PAYMENT_METHOD: "paymentMethod",
+	CONSTRUCTION_STAGE: "constructionStage",
+	OFFERING_TYPE: "offeringType",
 	DATE_CREATED: "meta.timeCreated"
 };
 
-const RANGED_FIELDS = {
-	PRICE_FROM: "ranged_" + Fields.PRICE_FROM,
-	PRICE_TO: "ranged_" + Fields.PRICE_TO
-};
-
-const IdFields = {
-	SOURCE: Fields.SOURCE + "._id",
-	ASSIGNEE: Fields.ASSIGNEE + "._id",
-	OWNER: Fields.OWNER + "._id",
-	BUSINESS_TYPE: Fields.BUSINESS_TYPE + "._id",
-	AVAILABILITY: Fields.AVAILABILITY + "._id",
-	HAS_MORTGAGE: Fields.HAS_MORTGAGE + "._id",
-};
-
-const GROUP_FIELDS = {
-	ROOMS_SPACES: "_roomsAndSpaces",
-	LOCATION: "_location"
-};
 
 
-export { Fields, IdFields, GROUP_FIELDS, RANGED_FIELDS };
+export { Fields };

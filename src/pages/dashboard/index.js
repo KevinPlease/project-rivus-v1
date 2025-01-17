@@ -10,8 +10,8 @@
 
 // import { Seo } from 'src/components/seo';
 // import { usePageView } from 'src/hooks/use-page-view';
-import { useSettings } from 'src/hooks/use-settings';
-import { Layout as DashboardLayout } from 'src/layouts/dashboard';
+import { useSettings } from "src/hooks/use-settings";
+import { Layout as DashboardLayout } from "src/layouts/dashboard";
 // import { OverviewBanner } from 'src/sections/dashboard/overview/overview-banner';
 // import { OverviewDoneTasks } from 'src/sections/dashboard/overview/overview-done-tasks';
 // import { OverviewEvents } from 'src/sections/dashboard/overview/overview-events';
@@ -23,18 +23,38 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard';
 // import { OverviewJobs } from 'src/sections/dashboard/overview/overview-jobs';
 // import { OverviewOpenTickets } from 'src/sections/dashboard/overview/overview-open-tickets';
 // import { OverviewTips } from 'src/sections/dashboard/overview/overview-tips';
-import { useEffect } from "react";
-import { useRouter } from "next/router";
-import { paths } from 'src/paths';
+import { useCallback, useEffect } from "react";
+import { useDispatch } from "react-redux";
 
+import notificationApi from "src/api/notification";
+import BaseAPI from "src/api/BaseAPI";
+import { useAuth } from "src/hooks/use-auth";
+import { setNotifications } from "src/slices/notification";
 // const now = new Date();
 
 const Page = () => {
+  const dispatch = useDispatch();
   // const settings = useSettings();
-  const route = useRouter()
+  const { user } = useAuth();
+  
+  const fetchData = useCallback(async () => {
+    const authInfo = BaseAPI.authForInfo(user);
+        const response = await notificationApi.getAll(authInfo, { filters: { isRead: false }, filterTypes: { and: ["isRead"] } });
+        if (!response) return;
+
+        dispatch(setNotifications(response));    
+  }, [user]);
+
   useEffect(() => {
-    route.push(paths.dashboard.customers);
-  }, [])
+    fetchData();
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 20000);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <>

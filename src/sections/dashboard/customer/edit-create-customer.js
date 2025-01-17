@@ -30,14 +30,23 @@ const useStore = () => {
   const handleGet = useCallback(async () => {
     try {
       const authInfo = BaseAPI.authForInfo(user);
-      const response = await customerApi.askById(authInfo, id);
-      if (!response) return;
+      let response = {};
+      if (id) {
+        response = await customerApi.getById(authInfo, id);
+        if (!response) return;
+
+      } else {
+        const formDetails = await customerApi.getFormDetails(authInfo);
+        response = {
+          formDetails: formDetails
+        };
+      }
 
       if (isMounted()) {
         setCustomer({
-          id: response.model._id,
-          displayId: response.model.displayId,
-          data: response.model.data,
+          id: response.model?._id,
+          displayId: response.model?.displayId,
+          data: response.model?.data,
           formOptions: response.formDetails
         });
       }
@@ -58,6 +67,7 @@ const useStore = () => {
     ...customer,
   };
 };
+
 const Page = ({ current }) => {
   const storeData = useStore();
 

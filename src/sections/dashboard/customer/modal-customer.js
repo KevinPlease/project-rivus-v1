@@ -25,8 +25,7 @@ const ModalCustomer = ({formOptions, handleClose, setResetOwner})=>{
             name:"",
             title:"",
             mobile:"",
-            assignee: user?._id || "",
-            submit: null
+            assignee: user?._id || ""
         },
         validationSchema: Yup.object({
             title: Yup.string().max(255).required(REQUIRED),
@@ -36,9 +35,8 @@ const ModalCustomer = ({formOptions, handleClose, setResetOwner})=>{
         }),
 
         onSubmit: async (values, helpers) => {
-            values.isDraft = false;
             const authInfo = BaseAPI.authForInfo(user);
-            const response = await customerApi.askById(authInfo, undefined);
+            const response = await customerApi.getById(authInfo, undefined);
             const updateResponse = await customerApi.update(authInfo,  response?.model?._id, values);
 
             if (updateResponse.status === "failure") {

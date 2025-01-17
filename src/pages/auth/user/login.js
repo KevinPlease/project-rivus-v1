@@ -20,8 +20,7 @@ import toast from "react-hot-toast";
 
 const initialValues = {
   username: "",
-  password: "",
-  submit: null
+  password: ""
 };
 
 const validationSchema = Yup.object({
@@ -52,7 +51,7 @@ const Page = () => {
         await signIn(values.username, values.password);
 
         if (isMounted()) {
-          const pathToReturnTo = returnTo !== "/" ? returnTo : paths.dashboard.customers;
+          const pathToReturnTo = returnTo !== "/" ? returnTo : paths.dashboard.index;
           router.push(pathToReturnTo);
         }
       } catch (err) {

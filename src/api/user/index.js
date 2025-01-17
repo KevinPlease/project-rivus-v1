@@ -4,7 +4,7 @@ import BaseAPI from "../BaseAPI.js";
 class UserAPI extends BaseAPI {
 
   static MODEL_NAME = "user";
-  static MODEL_NAME_PLURAL = "user";
+  static MODEL_NAME_PLURAL = "users";
   
   static AUTH = "auth";
 
@@ -21,10 +21,6 @@ class UserAPI extends BaseAPI {
     if (response.status === "failure") return;
 
     return response.data.token;
-  }
-
-  updateSelf(authInfo, data) {
-    return this.network.callPutAPI(authInfo, this.api.auth, data);
   }
 
   async changePassword(authInfo, oldPassword, newPassword) {

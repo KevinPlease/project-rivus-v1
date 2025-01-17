@@ -15,6 +15,7 @@ import Paper from "@mui/material/Paper";
 import ArrowRightIcon from "@untitled-ui/icons-react/build/esm/ArrowRight";
 import { useRouter } from "next/router";
 import { useUpdateEffect } from "src/hooks/use-update-effect";
+import { paths } from "src/paths";
 
 export const CustomerListTable = (props) => {
   const {
@@ -30,7 +31,7 @@ export const CustomerListTable = (props) => {
   const gridFilters = useSelector(state => state.gridFilters);
   const router = useRouter();
   const handledEditClick = (id) => {
-    router.push(`/dashboard/customers/${id}`); // Navigates to the detail page with specific id
+    router.push(paths.dashboard.customers.details.replace(":id", id));
   };
 
   useUpdateEffect(() => {
@@ -44,9 +45,9 @@ export const CustomerListTable = (props) => {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell align="center">ID</TableCell>
               <TableCell align="center">Title</TableCell>
               <TableCell align="center">Full Name</TableCell>
-              <TableCell align="center">ID</TableCell>
               <TableCell align="center">Phone</TableCell>
               <TableCell align="center">Assignee</TableCell>
               <TableCell align="right">Actions</TableCell>
@@ -58,11 +59,11 @@ export const CustomerListTable = (props) => {
                 key={customer?._id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
+                <TableCell align="center">{customer?.displayId}</TableCell>
                 <TableCell align="center">
                   {customer?.data?.title?.toUpperCase()}
                 </TableCell>
                 <TableCell align="center">{customer?.data?.name}</TableCell>
-                <TableCell align="center">{customer?.displayId}</TableCell>
                 <TableCell align="center">{customer?.data?.mobile}</TableCell>
                 <TableCell align="center">{customer?.data?.assignee?.data?.name}</TableCell>
                 <TableCell align="right">

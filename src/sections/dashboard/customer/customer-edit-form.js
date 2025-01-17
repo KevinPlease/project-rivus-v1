@@ -3,7 +3,6 @@ import toast from "react-hot-toast";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Unstable_Grid2";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
@@ -12,6 +11,7 @@ import Divider from "@mui/material/Divider";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { useRouter } from "next/router";
+import Edit02Icon from '@untitled-ui/icons-react/build/esm/Edit02';
 
 import { paths } from "src/paths";
 import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
@@ -19,18 +19,19 @@ import { CustomerBasicDetails } from "src/sections/dashboard/customer/customer-b
 import { CustomerPersonalDetails } from "src/sections/dashboard/customer/customer-personal-details";
 import { CustomerDataManagement } from "src/sections/dashboard/customer/customer-data-management";
 import { CustomerDocuments } from "src/sections/dashboard/customer/customer-documents";
-import { CustomerProperties } from "src/sections/dashboard/customer/customer-properties";
-import { CustomerAgentDetails } from "src/sections/dashboard/customer/customer-agent-details";
 import { ConfirmationDialog } from "src/sections/confirmation-dialog";
 import { FormButtons } from "src/sections/form-buttons";
 
-import { base64ToFile } from "src/utils/file-to-base64";
 import { toDocDetails } from "src/utils/files-to-docdetails";
 import customerApi from "src/api/customer";
 import { useAuth } from "src/hooks/use-auth";
 import BaseAPI from "src/api/BaseAPI";
 
 import ENV from "../../../../env";
+import { SvgIcon } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { showLoaderToast } from "src/slices/toast";
+import { FilteredOrders } from "src/sections/dashboard/order/filtered-orders";
 const LIMITED_ROLES = ENV.LIMITED_ROLES;
 
 const REQUIRED = "Field is required!";
@@ -38,6 +39,7 @@ const REQUIRED = "Field is required!";
 export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
   const { user } = useAuth();
   const router = useRouter();
+  const dispatch = useDispatch();
   const [currentTab, setCurrentTab] = useState("details");
   const [unlockedEdit, setUnlockedEdit] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,14 +47,26 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
 
   const tabs = useMemo(() => [
     { label: !unlockedEdit ? "Details" : "Edit Details", value: "details" },
-    { label: "Listings", value: "listings" },
-    { label: "Matches", value: "matches" },
+    { label: "Porosite", value: "orders" },
+    // { label: "Matches", value: "matches" },
     // { label: "Comments", value: "comments" },
   ], [unlockedEdit]);
 
   const isLimitedUser = useMemo(() => {
     return LIMITED_ROLES.includes(user?.data.role._id) && data?.assignee !== user?._id;
   }, [data, user]);
+
+  const createFileDetails = useCallback((doc) => {
+    const imgFile = doc.file;
+    return {
+      url: doc.url,
+      src: doc.src,
+      isImg: doc.isImg,
+      name: doc.name,
+      isRemoved: doc.isRemoved,
+      file: { name: imgFile.name, size: imgFile.size, type: imgFile.type }
+    };
+  }, []);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -61,13 +75,12 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
       title: data.title || "",
       mobile: data.mobile || "",
       email: data.email || "",
-      birthdate: data.birthdate ? new Date(data.birthdate) : null,
+      birthdate: data.birthdate ? new Date(data.birthdate) : new Date(Date.now()),
       address: data.address || "",
       personalId: data.personalId || "",
       assignee: data.assignee || "",
       description: data.description || "",
-      documents: data.documents || [],
-      submit: null
+      documents: data.documents || []
     },
     validationSchema: Yup.object({
       title: Yup.string().max(255).required(REQUIRED),
@@ -83,11 +96,10 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
     }),
 
     onSubmit: async (values, helpers) => {
-      values.isDraft = false;
-      await handleDocumentsUpload(files);
+      values.documents = files.filter(doc => doc.file !== undefined).map(createFileDetails);
+
       const authInfo = BaseAPI.authForInfo(user);
       const response = await customerApi.update(authInfo, id, values);
-
       if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
@@ -95,6 +107,8 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
         helpers.setSubmitting(false);
         return;
       }
+
+      handleUploads();
 
       helpers.setStatus({ success: true });
       helpers.setSubmitting(false);
@@ -111,20 +125,12 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
     setCurrentTab(value);
   }, []);
 
-  const transformData = useCallback((data, type) => {
-    if (!data) return [];
-
-    return data.map(item => {
-      const file = base64ToFile(item.src, item.id);
-      return { ...item, file };
-    });
-  }, []);
-
   useEffect(() => {
-    if (!data) return formik.setSubmitting(true);
+    setFiles((prevFiles) => {
+      if (!data.documents) return prevFiles;
 
-    setFiles(prevFiles => [...prevFiles, ...transformData(data.documents, "file")]);
-    formik.setSubmitting(false);
+      return [...prevFiles, ...data.documents];
+    });
   }, [data]);
 
   const handleFilesDrop = useCallback((newFiles) => {
@@ -142,26 +148,29 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
     });
   }, []);
 
-  const handleDocumentsUpload = useCallback(async (allDocuments) => {
-    try {
-      formik.setSubmitting(true);
-      const docFiles = allDocuments.map(docDetail => docDetail.file).filter(docFile => docFile !== undefined);
-      const authInfo = BaseAPI.authForInfo(user);
-      const response = await customerApi.uploadDocuments(authInfo, id, docFiles);
-      if (response.status === "success") {
-        formik.setErrors(null);
-        formik.setSubmitting(false);
-        return
-      }
+  const handleDocumentsUpload = useCallback(() => {
+    const docFiles = files.filter(doc => doc.file !== undefined).map(doc => doc.file);
+    const authInfo = BaseAPI.authForInfo(user);
+    return customerApi.uploadDocuments(authInfo, id, docFiles);
+  }, [id, files, user]);
 
-      const errMsg = "There was a problem uploading documents!";
-      formik.setErrors({ documents: errMsg });
-      formik.setSubmitting(false);
-      toast(errMsg);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [id]);
+  const handleUploads = useCallback(() => {
+    const toastInfo = {
+      promise: handleDocumentsUpload(),
+      messages: {
+        loading: "Uploading files...",
+        success: "Files uploaded successfully!",
+        error: "There was a problem uploading the files!"
+      },
+      config: {
+        success: {
+          duration: 3000
+        }
+      }
+    };
+
+    dispatch(showLoaderToast(toastInfo));
+  }, [id, files]);
 
   const handleDelete = useCallback(async (event) => {
     const authInfo = BaseAPI.authForInfo(user);
@@ -258,6 +267,11 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
                 <Button
                   size="large"
                   variant="text"
+                  startIcon={(
+                    <SvgIcon>
+                      <Edit02Icon />
+                    </SvgIcon>
+                  )}
                   onClick={changeMode}
                 >
                   Edit Details
@@ -300,7 +314,7 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
                     handleFilesRemoveAll={() => setFiles([])}
                     unlockedEdit={unlockedEdit}
                   />
-                  <CustomerAgentDetails formik={formik} unlockedEdit={unlockedEdit} formOptions={formOptions} />
+                  {/* <CustomerAgentDetails formik={formik} unlockedEdit={unlockedEdit} formOptions={formOptions} /> */}
                   <CustomerDataManagement formik={formik} unlockedEdit={unlockedEdit} handleDelete={() => setIsDialogOpen(true)} />
                   <div className="block lg:hidden">
                     <FormButtons
@@ -328,17 +342,7 @@ export const CustomerEditForm = ({ data, id, displayId, formOptions }) => {
 
       </form>
 
-      {currentTab === "properties" && <CustomerProperties data={data} id={id} />}
-      {/* {currentTab === 'comments' && (
-        <Stack spacing={2}>
-          <TaskComment
-            // key={comment.id}
-            // comment={comment}
-            pageName="Customer"
-            id={id}
-          />
-        </Stack>
-      )} */}
+      {currentTab === "orders" && id && <FilteredOrders filters={{ customer: id }} />}
     </>
   );
 };

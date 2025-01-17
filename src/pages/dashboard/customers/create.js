@@ -1,17 +1,21 @@
-import Box from '@mui/material/Box';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Container from '@mui/material/Container';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Box from "@mui/material/Box";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Container from "@mui/material/Container";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { useTranslation } from "react-i18next";
 
-import { BreadcrumbsSeparator } from 'src/components/breadcrumbs-separator';
-import { RouterLink } from 'src/components/router-link';
-import { Layout as DashboardLayout } from 'src/layouts/dashboard';
-import { paths } from 'src/paths';
+import { BreadcrumbsSeparator } from "src/components/breadcrumbs-separator";
+import { RouterLink } from "src/components/router-link";
+import { Layout as DashboardLayout } from "src/layouts/dashboard";
+import { tokens } from "src/locales/tokens";
+import { paths } from "src/paths";
 import EditCreateCustomer from "src/sections/dashboard/customer/edit-create-customer";
 
 const Page = () => {
+  const { t } = useTranslation();
+
   return (
     <>
       <Box
@@ -32,7 +36,7 @@ const Page = () => {
                   href={paths.dashboard.index}
                   variant="subtitle2"
                 >
-                  Dashboard/
+                  {t(tokens.nav.overview)}/
                 </Link>
                 <Link
                   color="text.primary"
@@ -40,17 +44,17 @@ const Page = () => {
                   href={paths.dashboard.customers.index}
                   variant="subtitle2"
                 >
-                  Management
+                  {t(tokens.nav.management)}
                 </Link>
                 <Typography
                   color="text.secondary"
                   variant="subtitle2"
                 >
-                  Customer
+                  {t(tokens.nav.customer)}
                 </Typography>
               </Breadcrumbs>
               <Typography variant="h4">
-              Customer Details
+              {t(tokens.nav.customerDetails)}
               </Typography>
             </Stack>
             <EditCreateCustomer current="Create" />

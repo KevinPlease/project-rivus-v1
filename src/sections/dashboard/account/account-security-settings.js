@@ -7,9 +7,12 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import toast from "react-hot-toast";
+import { SvgIcon } from "@mui/material";
+import Edit02Icon from "@untitled-ui/icons-react/build/esm/Edit02";
+
 import userAPI from "src/api/user";
 import BaseAPI from "src/api/BaseAPI";
-import toast from "react-hot-toast";
 
 
 export const AccountSecuritySettings = (props) => {
@@ -55,11 +58,20 @@ export const AccountSecuritySettings = (props) => {
 
   return (
     <Stack spacing={4}>
-      <div className={`ml-auto mr-2 ${isEditing ? "hidden" : ""}`}>
-        <Button onClick={handleEdit}>
-          Edit
-        </Button>
-      </div>
+      <Stack flex="flex" flexDirection="row" justifyContent="flex-end">
+        {!isEditing &&
+          <Button
+            size="large"
+            variant="text"
+            startIcon={(
+              <SvgIcon>
+                <Edit02Icon />
+              </SvgIcon>
+            )}
+            onClick={handleEdit}>
+            Ndrysho
+          </Button>}
+      </Stack>
 
       <Card>
         <CardContent>

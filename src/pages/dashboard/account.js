@@ -11,12 +11,12 @@ import { Layout as DashboardLayout } from "src/layouts/dashboard";
 import { AccountGeneralSettings } from "src/sections/dashboard/account/account-general-settings";
 import { AccountSecuritySettings } from "src/sections/dashboard/account/account-security-settings";
 import {useAuth} from "../../hooks/use-auth";
-
-const now = new Date();
+import { AccountNotificationsSettings } from "src/sections/dashboard/account/account-notifications-settings";
 
 const tabs = [
   { label: "General", value: "general" },
-  { label: "Security", value: "security" }
+  { label: "Security", value: "security" },
+  { label: "Notifications", value: "notifications" }
 ];
 
 const Page = () => {
@@ -73,6 +73,12 @@ const Page = () => {
           
           {currentTab === "security" && (
             <AccountSecuritySettings
+              user={user}
+            />
+          )}
+
+          {currentTab === "notifications" && (
+            <AccountNotificationsSettings
               user={user}
             />
           )}

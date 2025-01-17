@@ -21,6 +21,10 @@ import customerApi from "../../../api/customer";
 import BaseAPI from "src/api/BaseAPI";
 import { useAuth } from "src/hooks/use-auth";
 import { setFilters, setItemsPerPage, setPageNr } from "src/slices/grid-filters";
+import { useTranslation } from "react-i18next";
+import { tokens } from "src/locales/tokens";
+import { Breadcrumbs, Link } from "@mui/material";
+import { BreadcrumbsSeparator } from "src/components/breadcrumbs-separator";
 
 const DISPLAY_ID = Fields.DISPLAY_ID;
 const TITLE = Fields.TITLE;
@@ -85,7 +89,7 @@ const useCustomerStore = (searchState) => {
   const { user } = useAuth();
   const isMounted = useMounted();
   const [state, setState] = useState({
-    customer: [],
+    customers: [],
     formDetails: {
       [Fields.ASSIGNEE]: [],
       [Fields.SOURCE]: []
@@ -101,7 +105,7 @@ const useCustomerStore = (searchState) => {
 
       if (isMounted()) {
         setState({
-          customer: response.models,
+          customers: response.models,
           count: response.count,
           formDetails: response.formDetails
         });
@@ -110,12 +114,6 @@ const useCustomerStore = (searchState) => {
       console.error(err);
     }
   }, [searchState, isMounted]);
-  const handlePageChange = useCallback((event, page) => {
-    setState((prevState) => ({
-      ...prevState,
-      page
-    }));
-  }, []);
 
   useEffect(
     () => {
@@ -134,7 +132,7 @@ const useCustomerStore = (searchState) => {
 const Page = () => {
   const search = useCustomerSearch();
   const store = useCustomerStore(search.state);
-
+  const { t } = useTranslation();
 
   return (
     <>
@@ -155,8 +153,24 @@ const Page = () => {
             >
               <Stack spacing={1}>
                 <Typography variant="h4">
-                  Customers
+                  {t(tokens.nav.customers)}
                 </Typography>
+                <Breadcrumbs separator={<BreadcrumbsSeparator />}>
+                  <Link
+                    color="text.primary"
+                    component={RouterLink}
+                    href={paths.dashboard.index}
+                    variant="subtitle2"
+                  >
+                    {t(tokens.nav.dashboard)}
+                  </Link>
+                  <Typography
+                    color="text.secondary"
+                    variant="subtitle2"
+                  >
+                    {t(tokens.nav.customers)}
+                  </Typography>
+                </Breadcrumbs>
               </Stack>
               <Stack
                 alignItems="center"
@@ -173,10 +187,11 @@ const Page = () => {
                   )}
                   variant="contained"
                 >
-                  Add
+                  Shto
                 </Button>
               </Stack>
             </Stack>
+
             <Card>
               <CustomerListSearch
                 formDetails={store.formDetails}
@@ -184,7 +199,7 @@ const Page = () => {
               />
               <CustomerListTable
                 count={store.count}
-                items={store.customer}
+                items={store.customers}
                 onPageChange={search?.handlePageChange}
                 onRowsPerPageChange={search?.handleRowsPerPageChange}
                 pageNr={search?.state?.pageNr}

@@ -1,16 +1,16 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
-import { RouterLink } from 'src/components/router-link';
-import { Seo } from 'src/components/seo';
-import { usePageView } from 'src/hooks/use-page-view';
-import { paths } from 'src/paths';
+import { RouterLink } from "src/components/router-link";
+import { Seo } from "src/components/seo";
+import { usePageView } from "src/hooks/use-page-view";
+import { paths } from "src/paths";
 
 const Page = () => {
-  const mdUp = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const mdUp = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   usePageView();
 
@@ -20,17 +20,17 @@ const Page = () => {
       <Box
         component="main"
         sx={{
-          alignItems: 'center',
-          display: 'flex',
+          alignItems: "center",
+          display: "flex",
           flexGrow: 1,
-          py: '80px'
+          py: "80px"
         }}
       >
         <Container maxWidth="lg">
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
+              display: "flex",
+              justifyContent: "center",
               mb: 6
             }}
           >
@@ -39,15 +39,15 @@ const Page = () => {
               component="img"
               src="/assets/errors/error-404.png"
               sx={{
-                height: 'auto',
-                maxWidth: '100%',
+                height: "auto",
+                maxWidth: "100%",
                 width: 400
               }}
             />
           </Box>
           <Typography
             align="center"
-            variant={mdUp ? 'h1' : 'h4'}
+            variant={mdUp ? "h1" : "h4"}
           >
             404: The page you are looking for isn’t here
           </Typography>
@@ -60,8 +60,8 @@ const Page = () => {
           </Typography>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
+              display: "flex",
+              justifyContent: "center",
               mt: 6
             }}
           >

@@ -1,4 +1,4 @@
-// import { ExString } from "server/src/shared/String";
+import { ExString } from "server/src/shared/String";
 
 import ENV from "../../env";
 const API_URL = ENV.APP_API;
@@ -67,16 +67,20 @@ class Network {
       const response = await fetch(encodeURI(url), requestParams);
       
       let result = response;
-      if (responseType === "file") {
-        const blob = await response.blob();
-        result = {
-          content: new File([blob], "file"),
-          status: 200
-        };
-
-      } else {
-        result = await response[responseType]();
-
+      if (result.ok) {
+        if (responseType === "file") {
+          const cdispHeader = result.headers.get("content-disposition");
+          const filename = ExString.betweenFirstTwo(cdispHeader, "\"") || "download";
+          const blob = await response.blob();
+          result = {
+            content: new File([blob], filename),
+            status: 200
+          };
+  
+        } else {
+          result = await response[responseType]();
+  
+        }
       }
 
       status = result?.status === 200 ? "success" : "failure";
@@ -116,7 +120,7 @@ class Network {
     const response = await this.callAPI(absoluteUrl, params, responseType, false, authInfo);
 
     if (response.status === "failure") {
-      response.data = `Problem getting ${endpoint}!`;
+      response.data = `Problem getting ${absoluteUrl}!`;
     }
 
     return response;

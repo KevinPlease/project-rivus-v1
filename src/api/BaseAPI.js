@@ -3,9 +3,9 @@ import Filter from "./Filter";
 
 class BaseAPI {
 
-  static DRAFT = "draft";
   static FORM = "form";
   static IMAGE = "image";
+  static REPORT = "report";
   static SYNC = "sync";
   static IMAGES = BaseAPI.IMAGE + "s";
   static DOCUMENT = "document";
@@ -16,13 +16,12 @@ class BaseAPI {
       single: modelName,
       many: plural,
       
-      draft:        BaseAPI.DRAFT       + "/" + modelName,
-      formDetails:  BaseAPI.FORM        + "/" + modelName,
-      image:        BaseAPI.IMAGE       + "/" + modelName,
-      images:       BaseAPI.IMAGES      + "/" + modelName,
-      document:     BaseAPI.DOCUMENT    + "/" + modelName,
-      documents:    BaseAPI.DOCUMENTS   + "/" + modelName,
-      sync:         BaseAPI.SYNC        + "/" + plural
+      formDetails:  modelName + "/" + BaseAPI.FORM        ,
+      image:        modelName + "/" + BaseAPI.IMAGE       ,
+      report:       modelName + "/" + BaseAPI.REPORT       ,
+      images:       modelName + "/" + BaseAPI.IMAGES      ,
+      document:     modelName + "/" + BaseAPI.DOCUMENT    ,
+      documents:    modelName + "/" + BaseAPI.DOCUMENTS
     };
 
     this.network = new Network();
@@ -51,29 +50,12 @@ class BaseAPI {
     return response.data.formDetails;
   }
 
-  async getDraft(authInfo) {
-    const response = await this.network.callGetAPI(authInfo, this.api.draft);
-    if (response.status === "failure") return null;
-    
-    return response.data[this.api.single];
-  }
-
   async getById(authInfo, id) {
     const idQuery = { id };
     const response = await this.network.callGetAPI(authInfo, this.api.single, idQuery);
     if (response.status === "failure") return null;
 
     return response.data[this.api.single];
-  }
-
-  async askById(authInfo, id) {
-    if (id) return this.getById(authInfo, id);
-
-    const draft = await this.getDraft(authInfo);
-    if (draft) return draft;
-
-    const query = { isDraft: true };
-    return this.create(authInfo, undefined, query);
   }
 
   async create(authInfo, data, query) {
@@ -132,6 +114,16 @@ class BaseAPI {
     if (response.status === "failure") return null;
 
     return response.data;
+  }
+
+  async downloadReportByIds(authInfo, modelId, reportId) {
+    if (!reportId) reportId = Date.now();
+    const idQuery = { reportId };
+    const modelIdParams = [ modelId ];
+    const response = await this.network.callGetAPI(authInfo, this.api.report, idQuery, modelIdParams, "file");
+    if (response.status === "failure") return null;
+
+    return response;
   }
 
   async getSyncInfo(authInfo, lastSyncTime) {
