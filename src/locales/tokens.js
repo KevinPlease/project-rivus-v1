@@ -3,8 +3,10 @@ export const tokens = {
     languageChanged: 'common.languageChanged'
   },
   nav: {
+    administration: 'nav.administration',
     academy: 'nav.academy',
     account: 'nav.account',
+    add: 'nav.add',
     analytics: 'nav.analytics',
     auth: 'nav.auth',
     blog: 'nav.blog',
@@ -46,12 +48,18 @@ export const tokens = {
     postDetails: 'nav.postDetails',
     postList: 'nav.postList',
     pricing: 'nav.pricing',
-    propertyList: 'nav.properties',
+    products: 'nav.products',
     opportunity: 'nav.opportunity',
     profile: 'nav.profile',
     register: 'nav.register',
     resetPassword: 'nav.resetPassword',
     socialMedia: 'nav.socialMedia',
-    verifyCode: 'nav.verifyCode'
+    verifyCode: 'nav.verifyCode',
+    users: 'nav.users',
+    user: 'nav.user',
+    userDetails: 'nav.userDetails',
+    role: 'nav.role',
+    roles: 'nav.roles',
+    roleDetails: 'nav.roleDetails',
   }
 };

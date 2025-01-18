@@ -32,72 +32,72 @@ import { paths } from 'src/paths';
 import EmojiObjectsOutlinedIcon from '@mui/icons-material/EmojiObjectsOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
+import UsersPlus from 'src/icons/untitled-ui/duocolor/users-plus';
+import ShieldPlus from 'src/icons/untitled-ui/duocolor/shield-plus';
 
-export const useSections = () =>
-{
+export const useSections = () => {
   const { t } = useTranslation();
 
-  return useMemo(() =>
-  {
+  return useMemo(() => {
     return [
-      // {
-      //   items: [
-      //     {
-      //       title: t(tokens.nav.overview),
-      //       path: paths.dashboard.index,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <HomeSmileIcon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.analytics),
-      //       path: paths.dashboard.analytics,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <BarChartSquare02Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.ecommerce),
-      //       path: paths.dashboard.ecommerce,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <LineChartUp04Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.crypto),
-      //       path: paths.dashboard.crypto,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <CurrencyBitcoinCircleIcon />
-      //         </SvgIcon>
-      //       ),
-      //       label: (
-      //         <Chip
-      //           color="primary"
-      //           label="New"
-      //           size="small"
-      //         />
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.account),
-      //       path: paths.dashboard.account,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <HomeSmileIcon />
-      //         </SvgIcon>
-      //       )
-      //     }
-      //   ]
-      // },
       {
-        // subheader: t(tokens.nav.concepts),
+        items: [
+          {
+            title: t(tokens.nav.overview),
+            path: paths.dashboard.index,
+            icon: (
+              <SvgIcon fontSize="small">
+                <HomeSmileIcon />
+              </SvgIcon>
+            )
+          },
+          // {
+          //   title: t(tokens.nav.analytics),
+          //   path: paths.dashboard.analytics,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <BarChartSquare02Icon />
+          //     </SvgIcon>
+          //   )
+          // },
+          // {
+          //   title: t(tokens.nav.ecommerce),
+          //   path: paths.dashboard.ecommerce,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <LineChartUp04Icon />
+          //     </SvgIcon>
+          //   )
+          // },
+          // {
+          //   title: t(tokens.nav.crypto),
+          //   path: paths.dashboard.crypto,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <CurrencyBitcoinCircleIcon />
+          //     </SvgIcon>
+          //   ),
+          //   label: (
+          //     <Chip
+          //       color="primary"
+          //       label="New"
+          //       size="small"
+          //     />
+          //   )
+          // },
+          // {
+          //   title: t(tokens.nav.account),
+          //   path: paths.dashboard.account,
+          //   icon: (
+          //     <SvgIcon fontSize="small">
+          //       <HomeSmileIcon />
+          //     </SvgIcon>
+          //   )
+          // }
+        ]
+      },
+      {
+        subheader: t(tokens.nav.management),
         items: [
           {
             title: t(tokens.nav.customers),
@@ -107,425 +107,61 @@ export const useSections = () =>
                 <Users03Icon />
               </SvgIcon>
             ),
-            // items: [
-            //   {
-            //     title: t(tokens.nav.list),
-            //     path: paths.dashboard.customers.index
-            //   },
-            //   {
-            //     title: t(tokens.nav.create),
-            //     path: paths.dashboard.customers.create
-            //   }
-            // ]
-          },
-
+            items: [
+              {
+                title: t(tokens.nav.list),
+                path: paths.dashboard.customers.index
+              },
+              {
+                title: t(tokens.nav.add),
+                path: paths.dashboard.customers.create
+              }
+            ]
+          }]
+      },
+      {
+        subheader: t(tokens.nav.administration),
+        items: [
           {
-            title: t(tokens.nav.propertyList),
-            path: paths.dashboard.properties.index,
+            title: t(tokens.nav.users),
+            path: paths.dashboard.users.index,
             icon: (
               <SvgIcon fontSize="small">
-                <HomeOutlinedIcon/>
+                <UsersPlus />
               </SvgIcon>
             ),
-            // items: [
-            //   {
-            //     title: t(tokens.nav.list),
-            //     path: paths.dashboard.properties.index
-            //   },
-            //   {
-            //     title: t(tokens.nav.create),
-            //     path: paths.dashboard.properties.create
-            //   }
-            // ]
+            items: [
+              {
+                title: t(tokens.nav.list),
+                path: paths.dashboard.users.index
+              },
+              {
+                title: t(tokens.nav.add),
+                path: paths.dashboard.users.create
+              }
+            ]
           },
           {
-            title: t(tokens.nav.orderList),
+            title: t(tokens.nav.roles),
+            path: paths.dashboard.roles.index,
             icon: (
               <SvgIcon fontSize="small">
-                <ShoppingCart01Icon />
+                <ShieldPlus />
               </SvgIcon>
             ),
-            path: paths.dashboard.orders.index
-          },
-          // {
-          //   title: t(tokens.nav.invoiceList),
-          //   path: paths.dashboard.invoices.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <ReceiptCheckIcon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.list),
-          //       path: paths.dashboard.invoices.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.details),
-          //       path: paths.dashboard.invoices.details
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.logistics),
-          //   path: paths.dashboard.logistics.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <Truck01Icon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.dashboard),
-          //       path: paths.dashboard.logistics.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.fleet),
-          //       path: paths.dashboard.logistics.fleet
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.academy),
-          //   path: paths.dashboard.academy.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <GraduationHat01Icon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.dashboard),
-          //       path: paths.dashboard.academy.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.course),
-          //       path: paths.dashboard.academy.courseDetails
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.jobList),
-          //   path: paths.dashboard.jobs.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <Building04Icon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.browse),
-          //       path: paths.dashboard.jobs.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.details),
-          //       path: paths.dashboard.jobs.companies.details
-          //     },
-          //     {
-          //       title: t(tokens.nav.create),
-          //       path: paths.dashboard.jobs.create
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.socialMedia),
-          //   path: paths.dashboard.social.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <Share07Icon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.profile),
-          //       path: paths.dashboard.social.profile
-          //     },
-          //     {
-          //       title: t(tokens.nav.feed),
-          //       path: paths.dashboard.social.feed
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.blog),
-          //   path: paths.dashboard.blog.index,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <LayoutAlt02Icon />
-          //     </SvgIcon>
-          //   ),
-          //   items: [
-          //     {
-          //       title: t(tokens.nav.postList),
-          //       path: paths.dashboard.blog.index
-          //     },
-          //     {
-          //       title: t(tokens.nav.postDetails),
-          //       path: paths.dashboard.blog.postDetails
-          //     },
-          //     {
-          //       title: t(tokens.nav.postCreate),
-          //       path: paths.dashboard.blog.postCreate
-          //     }
-          //   ]
-          // },
-          // {
-          //   title: t(tokens.nav.fileManager),
-          //   path: paths.dashboard.fileManager,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <Upload04Icon />
-          //     </SvgIcon>
-          //   )
-          // },
-          // {
-          //   title: t(tokens.nav.kanban),
-          //   path: paths.dashboard.kanban,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <CheckDone01Icon />
-          //     </SvgIcon>
-          //   )
-          // },
-          // {
-          //   title: t(tokens.nav.mail),
-          //   path: paths.dashboard.mail,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <Mail03Icon />
-          //     </SvgIcon>
-          //   )
-          // },
-          // {
-          //   title: t(tokens.nav.chat),
-          //   path: paths.dashboard.chat,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <MessageChatSquareIcon />
-          //     </SvgIcon>
-          //   )
-          // },
-          // {
-          //   title: t(tokens.nav.calendar),
-          //   path: paths.dashboard.calendar,
-          //   icon: (
-          //     <SvgIcon fontSize="small">
-          //       <CalendarIcon />
-          //     </SvgIcon>
-          //   )
-          // }
+            items: [
+              {
+                title: t(tokens.nav.list),
+                path: paths.dashboard.roles.index
+              },
+              {
+                title: t(tokens.nav.add),
+                path: paths.dashboard.roles.create
+              }
+            ]
+          }
         ]
       },
-      // {
-      //   // subheader: t(tokens.nav.pages),
-      //   items: [
-      //     {
-      //       title: t(tokens.nav.auth),
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <Lock01Icon />
-      //         </SvgIcon>
-      //       ),
-      //       items: [
-      //         {
-      //           title: t(tokens.nav.login),
-      //           items: [
-      //             {
-      //               title: 'Classic',
-      //               path: paths.authDemo.login.classic
-      //             },
-      //             {
-      //               title: 'Modern',
-      //               path: paths.authDemo.login.modern
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           title: t(tokens.nav.register),
-      //           items: [
-      //             {
-      //               title: 'Classic',
-      //               path: paths.authDemo.register.classic
-      //             },
-      //             {
-      //               title: 'Modern',
-      //               path: paths.authDemo.register.modern
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           title: t(tokens.nav.forgotPassword),
-      //           items: [
-      //             {
-      //               title: 'Classic',
-      //               path: paths.authDemo.forgotPassword.classic
-      //             },
-      //             {
-      //               title: 'Modern',
-      //               path: paths.authDemo.forgotPassword.modern
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           title: t(tokens.nav.resetPassword),
-      //           items: [
-      //             {
-      //               title: 'Classic',
-      //               path: paths.authDemo.resetPassword.classic
-      //             },
-      //             {
-      //               title: 'Modern',
-      //               path: paths.authDemo.resetPassword.modern
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           title: t(tokens.nav.verifyCode),
-      //           items: [
-      //             {
-      //               title: 'Classic',
-      //               path: paths.authDemo.verifyCode.classic
-      //             },
-      //             {
-      //               title: 'Modern',
-      //               path: paths.authDemo.verifyCode.modern
-      //             }
-      //           ]
-      //         }
-      //       ]
-      //     },
-      //     {
-      //       title: t(tokens.nav.pricing),
-      //       path: paths.pricing,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <CreditCard01Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.checkout),
-      //       path: paths.checkout,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <LogOut01Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.contact),
-      //       path: paths.contact,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <Mail04Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: t(tokens.nav.error),
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <XSquareIcon />
-      //         </SvgIcon>
-      //       ),
-      //       items: [
-      //         {
-      //           title: '401',
-      //           path: paths.notAuthorized
-      //         },
-      //         {
-      //           title: '404',
-      //           path: paths.notFound
-      //         },
-      //         {
-      //           title: '500',
-      //           path: paths.serverError
-      //         }
-      //       ]
-      //     }
-      //   ]
-      // },
-      // {
-      //   subheader: 'Misc',
-      //   items: [
-      //     {
-      //       title: 'Level 0',
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <AlignLeft02Icon />
-      //         </SvgIcon>
-      //       ),
-      //       items: [
-      //         {
-      //           title: 'Level 1a',
-      //           items: [
-      //             {
-      //               title: 'Level 2a',
-      //               items: [
-      //                 {
-      //                   title: 'Level 3a'
-      //                 },
-      //                 {
-      //                   title: 'Level 3b',
-      //                   disabled: true
-      //                 }
-      //               ]
-      //             },
-      //             {
-      //               title: 'Level 2b'
-      //             }
-      //           ]
-      //         },
-      //         {
-      //           title: 'Level 1b'
-      //         }
-      //       ]
-      //     },
-      //     {
-      //       title: 'Disabled',
-      //       disabled: true,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <XSquareIcon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: 'Label',
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <File01Icon />
-      //         </SvgIcon>
-      //       ),
-      //       label: (
-      //         <Chip
-      //           color="primary"
-      //           label="New"
-      //           size="small"
-      //         />
-      //       )
-      //     },
-      //     {
-      //       title: 'Blank',
-      //       path: paths.dashboard.blank,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <File01Icon />
-      //         </SvgIcon>
-      //       )
-      //     },
-      //     {
-      //       title: 'External Link',
-      //       path: 'https://devias.io',
-      //       external: true,
-      //       icon: (
-      //         <SvgIcon fontSize="small">
-      //           <File01Icon />
-      //         </SvgIcon>
-      //       )
-      //     }
-      //   ]
-      // }
     ];
   }, [t]);
 };
