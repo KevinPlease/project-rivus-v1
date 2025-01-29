@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import { useFormik } from "formik";
@@ -16,7 +16,7 @@ import Stack from "@mui/material/Stack";
 import SvgIcon from "@mui/material/SvgIcon";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Edit02Icon from '@untitled-ui/icons-react/build/esm/Edit02';
+import Edit02Icon from "@untitled-ui/icons-react/build/esm/Edit02";
 
 import { FormButtons } from "src/sections/form-buttons";
 import { toImageDetails } from "src/utils/files-to-imagedetails";
@@ -25,31 +25,49 @@ import userAPI from "src/api/user";
 import { CropperModal } from "src/components/modals/CroppedModal";
 import { useAuth } from "src/hooks/use-auth";
 import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
-import { MenuItem } from "@mui/material";
+import { Divider, MenuItem, Tab, Tabs } from "@mui/material";
+import { UserRoles } from "./user-roles";
+import PhoneInput from "react-phone-input-2";
 
 const REQUIRED = "Field is required!";
 const validationSchema = Yup.object({
   name: Yup.string().max(255).required(REQUIRED),
   username: Yup.string().max(255).required(REQUIRED),
+  branch: Yup.string().max(255).required(REQUIRED),
   email: Yup.string().max(255).required(REQUIRED),
-  phone: Yup.string().max(255).required(REQUIRED)
+  phone: Yup.string().max(255).required(REQUIRED),
+  roles: Yup.object().required(REQUIRED),
+  images: Yup.array()
 });
 
-export const UserCreateEditForm = ({ current, model, formOptions, ...props }) => {
-  const { user } = useAuth()
-  const { _id: id, data, displayId } = model;
+export const UserCreateEditForm = ({ current, model, formOptions }) => {
+  const { user } = useAuth();
   const [unlockedEdit, setUnlockedEdit] = useState(current === "Create");
   const [image, setImage] = useState(null);
+  const [phoneError, setPhoneError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState("details");
+
+  const tabs = useMemo(() => [
+    { label: "Details", value: "details" },
+    { label: "Roles", value: "roles" }
+  ], [unlockedEdit]);
+
+  const data = useMemo(() => current === "Edit" ? model.data : {}, [model, current]);
+  const id = current === "Edit" && model._id;
+  const displayId = current === "Edit" && model.displayId;
 
   const formik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     initialValues: {
       name: data.name || "",
       username: data.username || "",
+      branch: data.branch || "",
       email: data.email || "",
       phone: data.phone || "",
-      password: data.password || ""
+      password: data.password || "",
+      roles: data.roles || {},
+      images: []
     },
     validationSchema,
     onSubmit: async (values, helpers) => {
@@ -85,6 +103,20 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
     setImage(data.images[0]);
   }, [data]);
 
+  const handlePhoneError= (e) => {
+    if (typeof e === "object" && e?.target?.value?.length < 5){
+      setPhoneError(true);
+    }else if(e < 5){
+      setPhoneError(true)
+    }else{
+      setPhoneError(false)
+    }
+  };
+
+  const handleTabsChange = useCallback((event, value) => {
+    setCurrentTab(value);
+  }, []);
+
   const handleImageDrop = useCallback((newImages) => {
     const imgDetails = toImageDetails(newImages);
     setImage(imgDetails[0]);
@@ -108,7 +140,6 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
     }
   }, [id, user]);
 
-
   const handleCancel = useCallback(() => {
     formik.resetForm();
     setUnlockedEdit((prevState) => !prevState);
@@ -116,18 +147,41 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
 
   return (
     <Stack>
-      <Stack
-        alignItems="center"
-        direction="row"
-        spacing={1}
-      >
-        <Typography variant="subtitle2">
-          ID:
-        </Typography>
-        <ClipboardChip
-          label={displayId}
-          size="small" />
-      </Stack>
+      {current === "Edit" &&
+        <Stack
+          alignItems="center"
+          direction="row"
+          spacing={1}
+        >
+          <Typography variant="subtitle2">
+            ID:
+          </Typography>
+          <ClipboardChip
+            label={displayId}
+            size="small" />
+        </Stack>
+      }
+
+      <div>
+        <Tabs
+          indicatorColor="primary"
+          onChange={handleTabsChange}
+          scrollButtons="auto"
+          textColor="primary"
+          value={currentTab}
+          variant="scrollable"
+        >
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.value}
+              label={tab.label}
+              value={tab.value}
+            />
+          ))}
+        </Tabs>
+        <Divider />
+      </div>
+
       <Stack flex="flex" flexDirection="row" justifyContent="flex-end">
         {!unlockedEdit &&
           <Button
@@ -148,229 +202,263 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
       </Stack>
       <form onSubmit={formik.handleSubmit}>
         <Stack spacing={2}>
-          <Card>
-            <CardContent>
-              <Grid
-                container
-                spacing={3}
-              >
+          {currentTab === "details" &&
+            (<Card>
+              <CardContent>
                 <Grid
-                  xs={12}
-                  md={4}
+                  container
+                  spacing={3}
                 >
-                  <Typography variant="h6">
-                    Basic details
-                  </Typography>
-                </Grid>
-                <Grid
-                  xs={12}
-                  md={8}
-                >
-                  <Stack spacing={3}>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <Box
-                        sx={{
-                          borderColor: "neutral.300",
-                          borderRadius: "50%",
-                          borderStyle: "dashed",
-                          borderWidth: 1,
-                          p: "4px"
-                        }}
+                  <Grid
+                    xs={12}
+                    md={4}
+                  >
+                    <Typography variant="h6">
+                      Basic details
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    xs={12}
+                    md={8}
+                  >
+                    <Stack spacing={3}>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
                       >
                         <Box
                           sx={{
+                            borderColor: "neutral.300",
                             borderRadius: "50%",
-                            height: "100%",
-                            width: "100%",
-                            position: "relative"
+                            borderStyle: "dashed",
+                            borderWidth: 1,
+                            p: "4px"
                           }}
                         >
                           <Box
                             sx={{
-                              alignItems: "center",
-                              backgroundColor: (theme) => alpha(theme.palette.neutral[700], 0.5),
                               borderRadius: "50%",
-                              color: "common.white",
-                              display: "flex",
                               height: "100%",
-                              justifyContent: "center",
-                              left: 0,
-                              opacity: 0,
-                              position: "absolute",
-                              top: 0,
                               width: "100%",
-                              zIndex: 1,
-                              ...(isDragActive && {
-                                backgroundColor: "action.active",
-                                opacity: 0.5
-                              }),
-                              ...(unlockedEdit && {
-                                cursor: "pointer"
-                              }),
-                              ...(unlockedEdit && {
-                                "&:hover": {
-                                  opacity: 1
-                                }
-                              })
-                            }}
-                            {...(unlockedEdit ? getRootProps() : {})}>
-                            {unlockedEdit &&
-                              <input
-                                {...getInputProps()}
-                                multiple={false}
-                                accept={{ "image/*": [] }} />}
-                            <Stack
-                              alignItems="center"
-                              direction="row"
-                              spacing={1}
-                            >
-                              <SvgIcon color="inherit">
-                                <Camera01Icon />
-                              </SvgIcon>
-                              <Typography
-                                color="inherit"
-                                variant="subtitle2"
-                                sx={{ fontWeight: 700 }}
-                              >
-                                Select
-                              </Typography>
-                            </Stack>
-                          </Box>
-                          <Avatar
-                            src={image?.url || image?.src}
-                            sx={{
-                              height: 150,
-                              width: 150
+                              position: "relative"
                             }}
                           >
-                            <SvgIcon>
-                              <User01Icon />
-                            </SvgIcon>
-                          </Avatar>
+                            <Box
+                              sx={{
+                                alignItems: "center",
+                                backgroundColor: (theme) => alpha(theme.palette.neutral[700], 0.5),
+                                borderRadius: "50%",
+                                color: "common.white",
+                                display: "flex",
+                                height: "100%",
+                                justifyContent: "center",
+                                left: 0,
+                                opacity: 0,
+                                position: "absolute",
+                                top: 0,
+                                width: "100%",
+                                zIndex: 1,
+                                ...(isDragActive && {
+                                  backgroundColor: "action.active",
+                                  opacity: 0.5
+                                }),
+                                ...(unlockedEdit && {
+                                  cursor: "pointer"
+                                }),
+                                ...(unlockedEdit && {
+                                  "&:hover": {
+                                    opacity: 1
+                                  }
+                                })
+                              }}
+                              {...(unlockedEdit ? getRootProps() : {})}>
+                              {unlockedEdit &&
+                                <input
+                                  {...getInputProps()}
+                                  multiple={false}
+                                  accept={{ "image/*": [] }} />}
+                              <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={1}
+                              >
+                                <SvgIcon color="inherit">
+                                  <Camera01Icon />
+                                </SvgIcon>
+                                <Typography
+                                  color="inherit"
+                                  variant="subtitle2"
+                                  sx={{ fontWeight: 700 }}
+                                >
+                                  Select
+                                </Typography>
+                              </Stack>
+                            </Box>
+                            <Avatar
+                              src={image?.url || image?.src}
+                              sx={{
+                                height: 150,
+                                width: 150
+                              }}
+                            >
+                              <SvgIcon>
+                                <User01Icon />
+                              </SvgIcon>
+                            </Avatar>
+                          </Box>
                         </Box>
-                      </Box>
 
-                    </Stack>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        disabled={!unlockedEdit}
-                        defaultValue={data.username}
-                        label="Username"
-                        sx={{ flexGrow: 1 }} />
-
-                    </Stack>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        error={!!(form.touched.branch && form.errors?.branch)}
-                        fullWidth
-                        label="Branch"
-                        name="branch"
-                        onBlur={form.handleBlur}
-                        onChange={form.handleChange}
-                        select
-                        required
-                        disabled={!unlockedEdit}
-                        value={field.value}
-                        // sx={{ flexGrow: 1 }}
-                        {...field}
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
                       >
-                        {formOptions.branch.map((option) => (
-                          <MenuItem key={option._id} value={option._id}>
-                            {option.data.name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Stack>
+                        {
+                          current === "Edit" ?
+                            (<TextField
+                              fullWidth
+                              disabled={true}
+                              defaultValue={data.username}
+                              label="Username" />)
+                            :
+                            (<TextField
+                              fullWidth
+                              error={!!(formik.touched.username && formik.errors?.username)}
+                              disabled={!unlockedEdit}
+                              value={formik.values.username}
+                              label="Username"
+                              name="username"
+                              required
+                              onBlur={formik.handleBlur}
+                              onChange={formik.handleChange} />)
+                        }
 
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        disabled={!unlockedEdit}
-                        error={!!(formik.touched?.phone && formik.errors?.phone)}
-                        name="phone"
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                        value={formik.values.phone}
-                        required
-                        label="Phone Number"
-                        sx={{ flexGrow: 1 }} />
-                    </Stack>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        disabled={!unlockedEdit}
-                        error={!!(formik.touched.name && formik.errors?.name)}
-                        name="name"
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                        value={formik.values.name}
-                        required
-                        label="Full Name"
-                        sx={{ flexGrow: 1 }} />
 
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
+                      >
+                        <TextField
+                          error={!!(formik.touched.branch && formik.errors?.branch)}
+                          fullWidth
+                          label="Branch"
+                          name="branch"
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                          select
+                          required
+                          disabled={!unlockedEdit}
+                          value={formik.values.branch}
+                        >
+                          {formOptions.branch.map((option) => (
+                            <MenuItem key={option._id} value={option._id}>
+                              {option.data.name}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
+                      >
+                        <TextField
+                          disabled={!unlockedEdit}
+                          error={!!(formik.touched.name && formik.errors?.name)}
+                          name="name"
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                          value={formik.values.name}
+                          required
+                          label="Full Name"
+                          sx={{ flexGrow: 1 }} />
+
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
+                      >
+                        <TextField
+                          error={!!(formik.touched?.email && formik.errors?.email)}
+                          name="email"
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                          value={formik.values.email}
+                          disabled={!unlockedEdit}
+                          label="Email Address"
+                          required
+                          sx={{
+                            flexGrow: 1,
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderStyle: "dashed"
+                            }
+                          }} />
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
+                      >
+                          <PhoneInput
+                            country={"al"}
+                            name="phone"
+                            regions={"europe"}
+                            containerStyle={{width:"100%", border: phoneError ? "2px red solid" : "none",borderRadius:"10px"}}
+                            inputStyle={{width:"95%",padding: "25px", marginLeft:"5%", background:"transparent",borderRadius:"9px", borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px"}}
+                            buttonStyle={{ marginRight: "10px", borderRadius:"8px", borderTopRightRadius: "0px", borderBottomRightRadius: "0px"}}
+                            onBlur={(event, data) => handlePhoneError(event)}
+                            placeholder="Phone*"
+                            onChange={(value,event)=>{
+                              formik.setFieldValue("phone", value)
+                              handlePhoneError(event)
+                            }}
+                            defaultErrorMessage="Field required"
+                            value={formik.values.phone}
+                            helperText={formik?.touched?.phone && formik.errors?.phone}
+                            inputProps={{
+                              name: "phone",
+                              required: true,
+                            }}
+                            enableClickOutside={true}
+                        />
+                      </Stack>
+                      <Stack
+                        alignItems="center"
+                        direction="row"
+                        spacing={2}
+                      >
+                        <TextField
+                          disabled={!unlockedEdit}
+                          error={!!(formik.touched?.password && formik.errors?.password)}
+                          name="password"
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                          value={formik.values.password}
+                          required={current !== "Edit"}
+                          type="password"
+                          label="Password"
+                          sx={{ flexGrow: 1 }} />
+                      </Stack>
                     </Stack>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        error={!!(formik.touched?.email && formik.errors?.email)}
-                        name="email"
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                        value={formik.values.email}
-                        disabled={!unlockedEdit}
-                        label="Email Address"
-                        required
-                        sx={{
-                          flexGrow: 1,
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderStyle: "dashed"
-                          }
-                        }} />
-                    </Stack>
-                    <Stack
-                      alignItems="center"
-                      direction="row"
-                      spacing={2}
-                    >
-                      <TextField
-                        disabled={!unlockedEdit}
-                        error={!!(formik.touched?.password && formik.errors?.password)}
-                        name="password"
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                        value={formik.values.password}
-                        required={current !== "Edit"}
-                        type="password"
-                        label="Password"
-                        sx={{ flexGrow: 1 }} />
-                    </Stack>
-                  </Stack>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-          {current === 'Edit' && (
+              </CardContent>
+            </Card>)
+          }
+
+          {currentTab === "roles" &&
+            (<UserRoles
+              formik={formik}
+              formOptions={formOptions}
+              unlockedEdit={unlockedEdit} />)
+          }
+
+          {current === "Edit" && (
             <Card>
               <CardContent>
                 <Grid
@@ -397,6 +485,7 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
                         Fshi perdoruesin me gjithe informacionet. Kjo nuk kthehet mbrapsht!
                       </Typography>
                       <Button
+                        disabled={!unlockedEdit}
                         color="error"
                         variant="outlined"
                       >

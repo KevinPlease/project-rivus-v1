@@ -197,6 +197,7 @@ const Page = () => {
                 onRowsPerPageChange={search?.handleRowsPerPageChange}
                 pageNr={search?.state?.pageNr}
                 itemsPerPage={search?.state?.itemsPerPage}
+                formOptions={store.formDetails}
               />
             </Card>
           </Stack>

@@ -7,7 +7,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 
 export const CustomerPersonalDetails = ({ formik, unlockedEdit, orientation = false }) => {
   const [phoneError, setPhoneError] = useState(false);

@@ -4,6 +4,8 @@ import "react-quill/dist/quill.snow.css";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 // Remove if simplebar is not used
 import "simplebar-react/dist/simplebar.min.css";
+// Using react phone
+import "react-phone-input-2/lib/style.css";
 import Head from "next/head";
 import { Provider as ReduxProvider } from "react-redux";
 import { CacheProvider } from "@emotion/react";

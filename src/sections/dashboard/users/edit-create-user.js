@@ -15,10 +15,8 @@ const useStore = () => {
   const { user } = useAuth();
   const isMounted = useMounted();
   const [store, setStore] = useState({
-    model: { data: {} },
-    formOptions: {
-      role: [],
-    }
+    model: null,
+    formOptions: null
   });
   const router = useRouter();
   const { id } = router.query;
@@ -26,8 +24,17 @@ const useStore = () => {
   const fetchModel = useCallback(async () => {
     try {
       const authInfo = BaseAPI.authForInfo(user);
-      const response = await userAPI.getById(authInfo, id);
-      if (!response) return;
+      let response = {};
+      if (id) {
+        response = await userAPI.getById(authInfo, id);
+        if (!response) return;
+
+      } else {
+        const formDetails = await userAPI.getFormDetails(authInfo);
+        response = {
+          formDetails: formDetails
+        };
+      }
 
       if (isMounted()) {
         setStore({
@@ -38,7 +45,7 @@ const useStore = () => {
     } catch (err) {
       console.error(err);
     }
-  }, [isMounted,router.query]);
+  }, [isMounted, router.query]);
 
   useEffect(
     () => {
@@ -54,6 +61,7 @@ const useStore = () => {
 
 const Page = ({ current }) => {
   const store = useStore();
+  if (!store.formOptions) return;
 
   return (
     <>

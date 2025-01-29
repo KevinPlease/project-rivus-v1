@@ -12,13 +12,14 @@ import TableRow from "@mui/material/TableRow";
 import TableContainer from "@mui/material/TableContainer";
 import { Scrollbar } from "src/components/scrollbar";
 import Paper from "@mui/material/Paper";
-import ArrowRightIcon from "@untitled-ui/icons-react/build/esm/ArrowRight";
+import DotsHorizontalIcon from "@untitled-ui/icons-react/build/esm/DotsHorizontal";
 import { useRouter } from "next/router";
 import { useUpdateEffect } from "src/hooks/use-update-effect";
 import { paths } from "src/paths";
 import { Avatar, Stack, Typography } from "@mui/material";
 import Users01 from "src/icons/untitled-ui/duocolor/users-01";
 import { SeverityPill } from "src/components/severity-pill";
+import { useAuth } from "src/hooks/use-auth";
 
 export const UserListTable = (props) => {
   const {
@@ -28,9 +29,11 @@ export const UserListTable = (props) => {
     },
     onRowsPerPageChange,
     pageNr = 0,
-    itemsPerPage = 10
+    itemsPerPage = 10,
+    formOptions = {}
   } = props;
 
+  const { user } = useAuth();
   const gridFilters = useSelector(state => state.gridFilters);
   const router = useRouter();
   const handledEditClick = (id) => {
@@ -49,12 +52,14 @@ export const UserListTable = (props) => {
           <TableHead>
             <TableRow>
               <TableCell>
-                Perdoruesi
+                FULL NAME
               </TableCell>
               <TableCell>
-                Roli
+                ACTIVE ROLE
               </TableCell>
-              <TableCell />
+              <TableCell align="right">
+                ACTIONS
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -91,13 +96,13 @@ export const UserListTable = (props) => {
                   </Stack>
                 </TableCell>
                 <TableCell>
-                  {item.data.role._id === '64b877be20a24bc2e25db5b8'
+                  {item.data.roles[user.branch] === "64b877be20a24bc2e25db5b8"
                     ? (
                       <SeverityPill>
-                        {item.data.role.data.name}
+                        {formOptions.role.find(r => r._id === item.data.roles[user.branch])?.data.name}
                       </SeverityPill>
                     )
-                    : item.data.role.data.name}
+                    : formOptions.role.find(r => r._id === item.data.roles[user.branch])?.data.name}
                 </TableCell>
                 <TableCell align="right">
                   <IconButton
@@ -106,8 +111,8 @@ export const UserListTable = (props) => {
                     }}
                   >
                     <SvgIcon>
-                      <ArrowRightIcon />
-                    </SvgIcon>
+                          <DotsHorizontalIcon />
+                        </SvgIcon>
                   </IconButton>
                 </TableCell>
               </TableRow>
