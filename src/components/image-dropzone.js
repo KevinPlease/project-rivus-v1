@@ -18,12 +18,12 @@ ImageListItem.propTypes = { children: PropTypes.node };
 export const ImageDropZone = (props) => {
   const { caption, images = [], onRemove, setImages, onRemoveAll, onUpload, unlockedEdit, ...other } = props;
   const { getRootProps, getInputProps, isDragActive } = useDropzone(other);
-  const [activeImg, setActiveImg] = useState({ id: null, url: null });
+  const [activeImg, setActiveImg] = useState({ name: null, url: null });
   const sensors = useSensors(useSensor(MouseSensor, TouchSensor));
 
   const handleDragStart = useCallback((event) => {
-    const img = images.find(img => img.id === event.active.id);
-    setActiveImg({ id: event.active.id, url: img.url || img.src });
+    const img = images.find(img => img.name === event.active.name);
+    setActiveImg({ name: event.active.name, url: img.url || img.src });
   }, [images]);
 
   const handleDeleteClick = useCallback((index) => {
@@ -36,15 +36,15 @@ export const ImageDropZone = (props) => {
 
   const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
-    if (active?.id && over?.id && active.id !== over.id) {
+    if (active?.name && over?.name && active.name !== over.name) {
       setImages((images) => {
-        const oldIndex = images.findIndex(obj => obj.id === active.id)
-        const newIndex = images.findIndex(obj => obj.id === over.id);
+        const oldIndex = images.findIndex(obj => obj.name === active.name)
+        const newIndex = images.findIndex(obj => obj.name === over.name);
         return arrayMove(images, oldIndex, newIndex)
       });
     }
 
-    setActiveImg({ id: null, url: null });
+    setActiveImg({ name: null, url: null });
   }, []);
 
   // function handleDblClick(index) {
@@ -181,8 +181,8 @@ export const ImageDropZone = (props) => {
                     // handleDblClick={handleDblClick}
                     unlockedEdit={unlockedEdit}
                     handleDeleteClick={handleDeleteClick}
-                    key={fileDetails.id}
-                    id={fileDetails.id}
+                    key={fileDetails.name}
+                    name={fileDetails.name}
                     url={fileDetails.url || fileDetails.src}
                     index={index}
                   />
@@ -190,8 +190,8 @@ export const ImageDropZone = (props) => {
               </SortableContext>
 
               <DragOverlay adjustScale={true}>
-                {activeImg.id ? (
-                  <Photo url={activeImg.url} index={images.findIndex(img => img.id === activeImg.id)} />
+                {activeImg.name ? (
+                  <Photo url={activeImg.url} index={images.findIndex(img => img.name === activeImg.name)} />
                 ) : null}
               </DragOverlay>
             </DndContext>

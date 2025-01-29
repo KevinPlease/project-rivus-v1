@@ -25,10 +25,12 @@ import userAPI from "src/api/user";
 import { CropperModal } from "src/components/modals/CroppedModal";
 import { useAuth } from "src/hooks/use-auth";
 import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
+import { MenuItem } from "@mui/material";
 
 const REQUIRED = "Field is required!";
 const validationSchema = Yup.object({
   name: Yup.string().max(255).required(REQUIRED),
+  username: Yup.string().max(255).required(REQUIRED),
   email: Yup.string().max(255).required(REQUIRED),
   phone: Yup.string().max(255).required(REQUIRED)
 });
@@ -38,12 +40,13 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
   const { _id: id, data, displayId } = model;
   const [unlockedEdit, setUnlockedEdit] = useState(current === "Create");
   const [image, setImage] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
       name: data.name || "",
+      username: data.username || "",
       email: data.email || "",
       phone: data.phone || "",
       password: data.password || ""
@@ -51,10 +54,16 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
     validationSchema,
     onSubmit: async (values, helpers) => {
       const authInfo = BaseAPI.authForInfo(user);
-      
+
       if (image) values.images = await handleImagesUpload([image]);
-      
-      const response = await userAPI.update(authInfo, id, values);
+
+      let response = null;
+      if (id) {
+        response = await userAPI.update(authInfo, id, values);
+      } else {
+        response = await userAPI.create(authInfo, values);
+      }
+
       if (response.status === "failure") {
         toast.error("Something went wrong!");
         helpers.setStatus({ success: false });
@@ -252,7 +261,7 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
                       spacing={2}
                     >
                       <TextField
-                        disabled
+                        disabled={!unlockedEdit}
                         defaultValue={data.username}
                         label="Username"
                         sx={{ flexGrow: 1 }} />
@@ -264,10 +273,25 @@ export const UserCreateEditForm = ({ current, model, formOptions, ...props }) =>
                       spacing={2}
                     >
                       <TextField
-                        disabled
-                        defaultValue={user?.branch}
+                        error={!!(form.touched.branch && form.errors?.branch)}
+                        fullWidth
                         label="Branch"
-                        sx={{ flexGrow: 1 }} />
+                        name="branch"
+                        onBlur={form.handleBlur}
+                        onChange={form.handleChange}
+                        select
+                        required
+                        disabled={!unlockedEdit}
+                        value={field.value}
+                        // sx={{ flexGrow: 1 }}
+                        {...field}
+                      >
+                        {formOptions.branch.map((option) => (
+                          <MenuItem key={option._id} value={option._id}>
+                            {option.data.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     </Stack>
 
                     <Stack

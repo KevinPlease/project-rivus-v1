@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 // import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
 import { useAuth } from "../../../hooks/use-auth";
+import { ExString } from 'server/src/shared/String';
 // import { usePopover } from 'src/hooks/use-popover';
 
 // import { TenantPopover } from './tenant-popover';
@@ -34,7 +35,7 @@ export const TenantSwitch = (props) => {
             color="neutral.400"
             variant="body2"
           >
-            { user?.branch }
+            { ExString.capitalize(user?.branch) }
           </Typography>
         </Box>
         {/* <IconButton

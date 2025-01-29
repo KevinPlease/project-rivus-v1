@@ -59,7 +59,7 @@ export const MultiSelect = (props) => {
                   value={option._id}
                 />
               )}
-              label={option.data.name}
+              label={option.data.name || option.data.title}
               sx={{
                 flexGrow: 1,
                 mr: 0

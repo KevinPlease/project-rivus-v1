@@ -3,8 +3,8 @@ import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {Photo} from "./photo";
 
-export const SortablePhoto = (props) => {
-    const sortable = useSortable({id: props.id});
+export const SortablePhoto = ({ name, ...props}) => {
+    const sortable = useSortable({ name });
     const {listeners, setNodeRef, transform, transition} = sortable;
 
     const style = {

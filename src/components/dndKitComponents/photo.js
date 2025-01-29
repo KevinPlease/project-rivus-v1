@@ -5,7 +5,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { saveAs } from "file-saver";
 
 export const Photo = forwardRef(
-  function Photo({ url, index, faded, style, ...props }, ref) {
+  function Photo({ url, index, faded, style, unlockedEdit, handleDeleteClick, ...props }, ref) {
     const inlineStyles = {
       opacity: faded ? "0.2" : "1",
       transformOrigin: "0 0",
@@ -27,7 +27,7 @@ export const Photo = forwardRef(
       <div
         style={inlineStyles}
       >
-        {props.unlockedEdit &&
+        {unlockedEdit &&
           <>
             <div
               ref={ref}
@@ -38,9 +38,9 @@ export const Photo = forwardRef(
             <span
               className={`h-fit ml-auto relative ${index === 0 ? "left-1 bottom-[295px] right-[0]" : "left-1 bottom-[145px] right-[0]"} w-full`}>
               <IconButton
-                removable
+                removable={true}
                 handle
-                onClick={() => props.handleDeleteClick(index)}
+                onClick={() => handleDeleteClick(index)}
                 className="justify-end bg-black bg-opacity-40  rounded-3xl p-1 "
                 sx={{
                   backgroundColor: "rgba(0, 0, 0, 0.4)",

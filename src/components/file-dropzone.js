@@ -161,7 +161,7 @@ export const FileDropzone = (props) => {
             rowHeight={200}>
 
             {files.map((fileDetails, index) => {
-              const id = fileDetails.id || fileDetails.file?.name;
+              const id = fileDetails.name;
               const extension = id.split('.').pop();
               return (
                 <div key={index}>
@@ -180,7 +180,7 @@ export const FileDropzone = (props) => {
                           <FileIcon extension={extension} />
                         </ListItemIcon>
                         <ListItemText
-                          primary={fileDetails.file.name}
+                          primary={fileDetails.name}
                           primaryTypographyProps={{ variant: 'subtitle2' }}
                           secondary={fileDetails.size ? bytesToSize(fileDetails.size) : ""}
                         />
@@ -188,7 +188,7 @@ export const FileDropzone = (props) => {
                           <span className="mr-2">
                             <IconButton
                               edge="end"
-                              onClick={() => handleDownload(fileDetails.url || fileDetails.src, fileDetails.file.name, extension )}
+                              onClick={() => handleDownload(fileDetails.url, fileDetails.name, extension )}
                               disabled={!unlockedEdit}
                             >
                               <SvgIcon>
