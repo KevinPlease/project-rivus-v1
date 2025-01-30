@@ -131,7 +131,7 @@ export const RoleListSearch = ({ handleFiltersChange, formDetails }) => {
             fullWidth
             value={userInput}
             onChange={handleInputChange}
-            placeholder="Search Title, Name or ID"
+            placeholder="Search by Name or ID"
             startAdornment={(
               <InputAdornment position="start">
                 <SvgIcon>

@@ -28,6 +28,7 @@ import { ClipboardChip } from "src/sections/components/buttons/clipboard_chip";
 import { Divider, MenuItem, Tab, Tabs } from "@mui/material";
 import { UserRoles } from "./user-roles";
 import PhoneInput from "react-phone-input-2";
+import { ExString } from "server/src/shared/String";
 
 const REQUIRED = "Field is required!";
 const validationSchema = Yup.object({
@@ -57,12 +58,14 @@ export const UserCreateEditForm = ({ current, model, formOptions }) => {
   const id = current === "Edit" && model._id;
   const displayId = current === "Edit" && model.displayId;
 
+  const curUserBranchName = ExString.betweenFirstTwo(model.repository, "/", "@");
+  const branch = formOptions.branch.find(b => b.data.name === curUserBranchName)?._id || formOptions.branch.find(b => b.data.name === user.branch)?._id;
   const formik = useFormik({
     enableReinitialize: false,
     initialValues: {
       name: data.name || "",
       username: data.username || "",
-      branch: data.branch || "",
+      branch: branch,
       email: data.email || "",
       phone: data.phone || "",
       password: data.password || "",
@@ -351,7 +354,7 @@ export const UserCreateEditForm = ({ current, model, formOptions }) => {
                           onChange={formik.handleChange}
                           select
                           required
-                          disabled={!unlockedEdit}
+                          disabled={true}
                           value={formik.values.branch}
                         >
                           {formOptions.branch.map((option) => (
@@ -407,6 +410,7 @@ export const UserCreateEditForm = ({ current, model, formOptions }) => {
                           <PhoneInput
                             country={"al"}
                             name="phone"
+                            disabled={!unlockedEdit}
                             regions={"europe"}
                             containerStyle={{width:"100%", border: phoneError ? "2px red solid" : "none",borderRadius:"10px"}}
                             inputStyle={{width:"95%",padding: "25px", marginLeft:"5%", background:"transparent",borderRadius:"9px", borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px"}}

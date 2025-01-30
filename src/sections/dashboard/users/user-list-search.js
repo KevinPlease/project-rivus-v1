@@ -131,7 +131,7 @@ export const UserListSearch = ({ handleFiltersChange, formDetails }) => {
             fullWidth
             value={userInput}
             onChange={handleInputChange}
-            placeholder="Kerko me emer, email"
+            placeholder="Search by Name or Email"
             startAdornment={(
               <InputAdornment position="start">
                 <SvgIcon>

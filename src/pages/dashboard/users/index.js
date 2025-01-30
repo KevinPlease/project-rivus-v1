@@ -180,7 +180,7 @@ const Page = () => {
                   )}
                   variant="contained"
                 >
-                  Shto
+                  {t(tokens.nav.create)}
                 </Button>
               </Stack>
             </Stack>
