@@ -16,20 +16,26 @@ const useStore = () => {
   const { user } = useAuth();
   const isMounted = useMounted();
   const [store, setStore] = useState({
-    model: { data: {} },
-    formOptions: {
-      assignee: [],
-      source: []
-    }
+    model: null,
+    formOptions: null
   });
   const router = useRouter();
   const { id } = router.query;
 
-  const handleGet = useCallback(async () => {
+  const fetchModel = useCallback(async () => {
     try {
       const authInfo = BaseAPI.authForInfo(user);
-      const response = await roleApi.getById(authInfo, id);
-      if (!response) return;
+      let response = {};
+      if (id) {
+        response = await roleApi.getById(authInfo, id);
+        if (!response) return;
+
+      } else {
+        const formDetails = await roleApi.getFormDetails(authInfo);
+        response = {
+          formDetails: formDetails
+        };
+      }
 
       if (isMounted()) {
         setStore({
@@ -37,7 +43,6 @@ const useStore = () => {
           formOptions: response.formDetails
         });
       }
-
     } catch (err) {
       console.error(err);
     }
@@ -45,7 +50,7 @@ const useStore = () => {
 
   useEffect(
     () => {
-      handleGet();
+      fetchModel();
     },
     [router.query]
   );
@@ -57,6 +62,7 @@ const useStore = () => {
 
 const Page = ({ current }) => {
   const store = useStore();
+  if (!store.formOptions) return;
 
   return (
     <>

@@ -33,11 +33,14 @@ const validationSchema = Yup.object({
 
 export const RoleCreateForm = ({ current, model, formOptions }) => {
   const { user } = useAuth();
-  const { _id: id, data, displayId } = model;
   const router = useRouter();
   const [unlockedEdit, setUnlockedEdit] = useState(current === "Create");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState("details");
+
+  const data = useMemo(() => current === "Edit" ? model.data : {}, [model, current]);
+  const id = current === "Edit" && model._id;
+  const displayId = current === "Edit" && model.displayId;
 
   const tabs = useMemo(() => [
     { label: "Details", value: "details" },
@@ -47,11 +50,11 @@ export const RoleCreateForm = ({ current, model, formOptions }) => {
   ], [unlockedEdit]);
 
   const formik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     initialValues: {
       name: data.name || "",
       actions: data.actions || [],
-      accessInfo: data.accessInfo || [],
+      accessInfo: data.accessInfo || formOptions.accessInfo[0],
       assignee: data.assignee || user?._id || "",
       description: data.description || ""
     },
@@ -127,18 +130,20 @@ export const RoleCreateForm = ({ current, model, formOptions }) => {
 
   return (
     <Stack>
-      <Stack
-        alignItems="center"
-        direction="row"
-        spacing={1}
-      >
-        <Typography variant="subtitle2">
-          ID:
-        </Typography>
-        <ClipboardChip
-          label={displayId}
-          size="small" />
-      </Stack>
+      {current === "Edit" &&
+        (<Stack
+          alignItems="center"
+          direction="row"
+          spacing={1}
+        >
+          <Typography variant="subtitle2">
+            ID:
+          </Typography>
+          <ClipboardChip
+            label={displayId}
+            size="small" />
+        </Stack>)
+      }
 
       <div>
         <Tabs
@@ -188,7 +193,7 @@ export const RoleCreateForm = ({ current, model, formOptions }) => {
 
           {currentTab === 'role_actions' && (
             <RoleActions
-              items={formOptions.action || []}
+              items={formOptions.action}
               selected={formik.values.actions}
               onDeselectAll={handleActionDeselect}
               onDeselectOne={handleActionDeselect}
@@ -200,7 +205,7 @@ export const RoleCreateForm = ({ current, model, formOptions }) => {
 
           {currentTab === 'role_access_info_global' && (
             <RoleAccessInfo
-              formik={formik}  
+              formik={formik}
               accessInfo={formik.values.accessInfo.global || {}}
               handleAccessInfoChange={handleAccessInfoChange}
               unlockedEdit={unlockedEdit}
@@ -209,7 +214,7 @@ export const RoleCreateForm = ({ current, model, formOptions }) => {
 
           {currentTab === 'role_access_info_fieldAccess' && (
             <RoleAccessInfoFields
-              formik={formik}  
+              formik={formik}
               accessInfo={formik.values.accessInfo.fieldAccess || {}}
               handleAccessInfoChange={handleAccessInfoChange}
               unlockedEdit={unlockedEdit}

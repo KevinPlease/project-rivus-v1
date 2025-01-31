@@ -27,7 +27,7 @@ export const RoleAccessInfoFields = (props) => {
   }, [accessInfo]);
 
   const modelFields = useMemo(() => {
-    return Object.keys(accessInfo[selectedRole]);
+    return Object.keys(accessInfo[selectedRole] || {});
   }, [accessInfo, selectedRole]);
 
   return (
