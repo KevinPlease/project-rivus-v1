@@ -16,6 +16,7 @@ import { ExString } from 'server/src/shared/String';
 export const TenantSwitch = (props) => {
   // const popover = usePopover();
   const { user } = useAuth();
+  if (!user) return;
 
   return (
     <>
@@ -29,13 +30,13 @@ export const TenantSwitch = (props) => {
             color="inherit"
             variant="h6"
           >
-            { user?.domain }
+            { user.domain }
           </Typography>
           <Typography
             color="neutral.400"
             variant="body2"
           >
-            { ExString.capitalize(user?.branch) }
+            { ExString.capitalize(user.branch) }
           </Typography>
         </Box>
         {/* <IconButton
