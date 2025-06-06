@@ -1,6 +1,10 @@
-Project Rivus v1
+Project Rivus v1 - NextJS General Purpose Template
+
+# Intro
+Rivus v1 is a full MERN-stack general-purpose NextJS application, implemented using NextJS and custom server integration for Rivus server app. The Rivus server is configured as a git submodule.
 
 # Getting Started
+NOTE: Due to time constraints, the below might have stale information.
 
 ## Installation
 
